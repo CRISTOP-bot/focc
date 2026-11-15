@@ -1793,6 +1793,21 @@ static void lower_global_one(FOCSema *sema, FOCDecl *decl) {
         scope_define(sema, symbol);
         return;
     }
+    /* Un prototipo de funcion registra un simbolo de funcion, no un objeto. */
+    if (type && type->kind == FOC_TYPE_FUNCTION) {
+        FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
+                                       FOC_SYM_FUNCTION);
+        if (!symbol) {
+            return;
+        }
+        symbol->type = type;
+        symbol->is_global = true;
+        symbol->is_static = decl->spec->is_static;
+        symbol->is_extern = true;
+        symbol->span = decl->declarator->name_span;
+        scope_define(sema, symbol);
+        return;
+    }
     FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
                                    FOC_SYM_VARIABLE);
     if (!symbol) {
