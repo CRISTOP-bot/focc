@@ -1006,6 +1006,8 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
     /* Lee el nombre del fichero. */
     char *name = NULL;
     FOCToken *tok = peek_token(pp);
+    FOCSpan include_span = tok ? (FOCSpan){tok->file_id, tok->start, tok->end}
+                               : (FOCSpan){-1, 0, 0};
     if (tok && tok->kind == FOC_TOK_STRING) {
         next_token(pp);
         name = tok_dup(tok);
@@ -1030,7 +1032,9 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
             if (tok_is_punct(part, ">")) {
                 break;
             }
-            if (buf.len > 0) {
+            /* El nombre es literal entre < y >: solo hay espacio si el
+             * fuente lo tenia. */
+            if (part->space_before && buf.len > 0) {
                 FOC_buf_putc(&buf, ' ');
             }
             FOC_buf_append(&buf, part->text, part->len);
@@ -1047,7 +1051,7 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
     skip_line(pp);
 
     if (pp->depth > 64) {
-        FOC_diag_error(pp->diag, (FOCSpan){-1, 0, 0}, "E0303", "inclusion anidada demasiado profunda");
+        FOC_diag_error(pp->diag, include_span, "E0303", "inclusion anidada demasiado profunda");
         free(name);
         return;
     }
@@ -1092,7 +1096,6 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
             break;
         }
     }
-    free(name);
     for (size_t i = 0; i < candidates.len; i++) {
         char *candidate = *(char **)FOC_VEC_AT(&candidates, char *, i);
         if (candidate != found) {
@@ -1102,15 +1105,18 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
     FOC_vec_free(&candidates);
 
     if (!found) {
-        FOC_diag_error(pp->diag, (FOCSpan){-1, 0, 0}, "E0304", "no se encuentra el fichero incluido");
+        FOC_diag_error(pp->diag, include_span, "E0304",
+                       "no se encuentra el fichero incluido '%s'", name ? name : "<desconocido>");
+        free(name);
         return;
     }
+    free(name);
     if (file_in_once_list(pp, found)) {
         free(found);
         return;
     }
     if (pp->depth > 64) {
-        FOC_diag_error(pp->diag, (FOCSpan){-1, 0, 0}, "E0303", "inclusion anidada demasiado profunda");
+        FOC_diag_error(pp->diag, include_span, "E0303", "inclusion anidada demasiado profunda");
         free(found);
         return;
     }
@@ -1119,7 +1125,7 @@ static void handle_include(FOCPreproc *pp, bool is_system) {
     char *data = NULL;
     size_t len = 0;
     if (!read_whole_file(found, &data, &len)) {
-        FOC_diag_error(pp->diag, (FOCSpan){-1, 0, 0}, "E0305", "no se puede abrir '%s'", found);
+        FOC_diag_error(pp->diag, include_span, "E0305", "no se puede abrir '%s'", found);
         free(found);
         return;
     }
@@ -1229,7 +1235,11 @@ bool FOC_preprocess(const FOCSourceFile *file, FOCSourceMgr *sources, FOCDiagEng
     FOCTokenList tokens;
     FOC_token_list_init(&tokens);
     FOC_lex_file(file, diag, &tokens);
-    source_push(&pp, tokens.data, tokens.len, false, NULL);
+    FOCTokenSource *main_src = source_push(&pp, tokens.data, tokens.len, false, NULL);
+    if (main_src) {
+        /* El directorio del fichero principal tambien se busca en "". */
+        main_src->dir = dir_of(file->path);
+    }
 
     CondState *conds = (CondState *)calloc(64, sizeof(CondState));
     size_t cond_count = 0;
