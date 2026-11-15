@@ -1023,8 +1023,15 @@ static FOCExpr *parse_primary(FOCParser *p) {
                     expr->sizeof_expr.type_name = type_name;
                     return expr;
                 }
+                /* No era un nombre de tipo: es una expresion entre
+                 * parentesis y el cierre se consume aqui. */
                 p->pos = saved;
                 advance(p);
+                FOCExpr *operand = parse_unary(p);
+                expect_punct(p, ")");
+                FOCExpr *expr = FOC_ast_expr(FOC_EXPR_SIZEOF, span_of(p, tok));
+                expr->sizeof_expr.expr = operand;
+                return expr;
             }
             FOCExpr *operand = parse_unary(p);
             FOCExpr *expr = FOC_ast_expr(FOC_EXPR_SIZEOF, span_of(p, tok));
