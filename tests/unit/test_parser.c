@@ -44,6 +44,26 @@ void test_parser(void) {
     CHECK(memcmp(unit->decls[0]->declarator->name, "main", 4) == 0);
     CHECK(unit->decls[0]->body != NULL);
 
+    /* Declaracion con varios declaradores: la cadena `next` los conserva. */
+    unit = parse_text("int a = 1, b = 2, c = 3;", &errors);
+    CHECK_INT(errors, 0);
+    CHECK(unit != NULL);
+    CHECK(unit->decls[0]->next != NULL);
+    if (unit->decls[0]->next) {
+        CHECK(unit->decls[0]->next->declarator != NULL);
+        CHECK_INT(unit->decls[0]->next->declarator->name_len, 1);
+        CHECK(memcmp(unit->decls[0]->next->declarator->name, "b", 1) == 0);
+        CHECK(unit->decls[0]->next->init != NULL);
+        CHECK(unit->decls[0]->next->next != NULL);
+        if (unit->decls[0]->next->next) {
+            CHECK(memcmp(unit->decls[0]->next->next->declarator->name, "c", 1) == 0);
+        }
+    }
+
+    /* Declaracion dentro del inicializador de un for. */
+    unit = parse_text("int f(void) { for (int i = 0; i < 3; i++) { } return 0; }", &errors);
+    CHECK_INT(errors, 0);
+
     /* Variable global. */
     unit = parse_text("int contador = 3;", &errors);
     CHECK_INT(errors, 0);

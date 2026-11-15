@@ -157,6 +157,7 @@ struct FOCDecl {
     FOCDeclarator *declarator;
     FOCExpr *init;
     FOCStmt *body; /* cuerpo de la definición de función */
+    FOCDecl *next; /* resto de declaradores de la misma declaración */
 };
 
 /* ------------------------------------------------------------------ */

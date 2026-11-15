@@ -1379,15 +1379,27 @@ static FOCStmt *parse_local_decl(FOCParser *p, FOCSpan span) {
             advance(p);
             decl->init = parse_assign(p);
         }
+        /* Declaradores adicionales: se enlazan en la cadena `next`. */
+        FOCDecl *tail = decl;
         while (eat_punct(p, ",")) {
             FOCDeclarator *extra = parse_declarator(p);
             if (!extra) {
                 break;
             }
+            FOCDecl *more = (FOCDecl *)calloc(1, sizeof(FOCDecl));
+            more->kind = decl->kind;
+            more->span = extra->span;
+            more->spec = decl->spec;
+            more->declarator = extra;
+            if (decl->spec->is_typedef) {
+                FOC_map_put(&p->typedefs, extra->name, extra->name_len, (void *)1);
+            }
             if (at_punct(p, "=")) {
                 advance(p);
-                parse_assign(p);
+                more->init = parse_assign(p);
             }
+            tail->next = more;
+            tail = more;
         }
     }
     expect_punct(p, ";");
@@ -1469,14 +1481,17 @@ static FOCStmt *parse_stmt(FOCParser *p) {
         FOCStmt *init = NULL;
         if (!at_punct(p, ";")) {
             if (starts_declaration(p)) {
+                /* parse_local_decl consume el ';' final. */
                 init = parse_local_decl(p, span_of(p, cur(p)));
             } else {
                 FOCExpr *e = parse_expr(p);
                 init = FOC_ast_stmt(FOC_STMT_EXPR, e ? e->span : span_of(p, tok));
                 init->expr.expr = e;
+                expect_punct(p, ";");
             }
+        } else {
+            advance(p);
         }
-        expect_punct(p, ";");
         FOCExpr *cond = at_punct(p, ";") ? NULL : parse_expr(p);
         expect_punct(p, ";");
         FOCExpr *post = at_punct(p, ")") ? NULL : parse_expr(p);
@@ -1663,18 +1678,27 @@ static FOCDecl *parse_external_decl(FOCParser *p) {
         advance(p);
         decl->init = parse_assign(p);
     }
+    /* Declaradores adicionales: se enlazan en la cadena `next`. */
+    FOCDecl *tail = decl;
     while (eat_punct(p, ",")) {
         FOCDeclarator *extra = parse_declarator(p);
         if (!extra) {
             break;
         }
+        FOCDecl *more = (FOCDecl *)calloc(1, sizeof(FOCDecl));
+        more->kind = decl->kind;
+        more->span = extra->span;
+        more->spec = decl->spec;
+        more->declarator = extra;
         if (decl->spec->is_typedef) {
             FOC_map_put(&p->typedefs, extra->name, extra->name_len, (void *)1);
         }
         if (at_punct(p, "=")) {
             advance(p);
-            parse_assign(p);
+            more->init = parse_assign(p);
         }
+        tail->next = more;
+        tail = more;
     }
     expect_punct(p, ";");
     return decl;

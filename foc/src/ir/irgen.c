@@ -1330,9 +1330,22 @@ static void lower_block(FOCSema *sema, FOCStmt *stmt) {
     scope_pop(sema);
 }
 
-static void lower_local_decl(FOCSema *sema, FOCDecl *decl) {
+static void lower_local_decl_one(FOCSema *sema, FOCDecl *decl) {
     FOCType *type = resolve_declarator_type(sema, decl->spec, decl->declarator);
     if (!decl->declarator || !decl->declarator->has_name) {
+        return;
+    }
+    /* Un typedef registra un simbolo de tipo y no emite nada mas. */
+    if (decl->spec->is_typedef) {
+        FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
+                                       FOC_SYM_TYPEDEF);
+        if (!symbol) {
+            return;
+        }
+        symbol->type = type;
+        symbol->is_local = true;
+        symbol->span = decl->declarator->name_span;
+        scope_define(sema, symbol);
         return;
     }
     FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
@@ -1374,6 +1387,13 @@ static void lower_local_decl(FOCSema *sema, FOCDecl *decl) {
         store->lhs = init.value;
         store->rhs = address;
         store->type = ir_type_of(sema, type);
+    }
+}
+
+static void lower_local_decl(FOCSema *sema, FOCDecl *decl) {
+    /* Una declaración con varios declaradores es una cadena de FOCDecl. */
+    for (FOCDecl *d = decl; d; d = d->next) {
+        lower_local_decl_one(sema, d);
     }
 }
 
@@ -1754,9 +1774,23 @@ static void lower_function(FOCSema *sema, FOCDecl *decl) {
     }
 }
 
-static void lower_global(FOCSema *sema, FOCDecl *decl) {
+static void lower_global_one(FOCSema *sema, FOCDecl *decl) {
     FOCType *type = resolve_declarator_type(sema, decl->spec, decl->declarator);
     if (!decl->declarator || !decl->declarator->has_name) {
+        return;
+    }
+    /* Un typedef global registra un simbolo de tipo y no emite nada. */
+    if (decl->spec->is_typedef) {
+        FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
+                                       FOC_SYM_TYPEDEF);
+        if (!symbol) {
+            return;
+        }
+        symbol->type = type;
+        symbol->is_global = true;
+        symbol->is_static = decl->spec->is_static;
+        symbol->span = decl->declarator->name_span;
+        scope_define(sema, symbol);
         return;
     }
     FOCSymbol *symbol = symbol_new(decl->declarator->name, decl->declarator->name_len,
@@ -1823,11 +1857,13 @@ FOCIRModule *FOC_irgen(FOCUnit *unit, FOCDiagEngine *diag, FOCSourceMgr *sources
     scope_push(&sema);
 
     for (size_t i = 0; i < unit->count; i++) {
-        FOCDecl *decl = unit->decls[i];
-        if (decl->kind == FOC_DCL_FUNCTION) {
-            lower_function(&sema, decl);
-        } else {
-            lower_global(&sema, decl);
+        /* Una declaración con varios declaradores es una cadena de FOCDecl. */
+        for (FOCDecl *d = unit->decls[i]; d; d = d->next) {
+            if (d->kind == FOC_DCL_FUNCTION) {
+                lower_function(&sema, d);
+            } else {
+                lower_global_one(&sema, d);
+            }
         }
     }
     scope_pop(&sema);
