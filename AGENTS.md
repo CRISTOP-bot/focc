@@ -1,9 +1,9 @@
-# FOC — instrucciones para agentes automaticos.
+# FOCC (FOC) — instrucciones para agentes automaticos.
 
-FOC (Fucking Optimized C Compiler) es un compilador propio de C escrito en
-C11 portable. **No** usa GCC, Clang ni LLVM como frontend o backend del
-codigo de usuario: el lexer, el preprocesador, el parser, el analisis
-semantico, la IR, el optimizador y el backend son propios.
+FOCC, abreviado FOC (Fucking Optimized C Compiler), es un compilador propio de
+C escrito en C11 portable. **No** usa GCC, Clang ni LLVM como frontend o
+backend del codigo de usuario: el lexer, el preprocesador, el parser, el
+analisis semantico, la IR, el optimizador y el backend son propios.
 
 ## Estructura
 

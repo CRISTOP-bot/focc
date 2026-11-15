@@ -1,0 +1,14 @@
+language: "es-ES"
+
+reviews:
+  profile: "chill"
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+  tools:
+    github-checks:
+      enabled: true
+  finishing_touches:
+    fix_ci:
+      enabled: true

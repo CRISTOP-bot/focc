@@ -1,4 +1,4 @@
-# Arquitectura de FOC
+# Arquitectura de FOCC (FOC)
 
 ## 1. Pipeline
 
@@ -8,6 +8,11 @@ fuente → preprocesador → lexer → parser → AST → semántica → IR → 
 
 Cada etapa tiene una interfaz explícita y un fichero propio. El driver
 (`foc/src/driver/`) las orquesta.
+
+Las entradas de bajo nivel siguen rutas separadas: `.s` va directamente a GNU
+`as`, `.S` pasa primero por el preprocesador C (`cc -E -x assembler-with-cpp`)
+y `.m4` pasa por GNU M4 antes de GNU `as`. Sus objetos pueden enlazarse con
+objetos generados desde C; FOCC no implementa otro ensamblador ni M4.
 
 ## 2. Estructura del árbol
 
@@ -62,6 +67,6 @@ exacta. Ver `docs/architecture.md` y `.skills/foc-testing/SKILL.md`.
 ## 6. Verificación
 
 - `make check` — unitarias e integración.
-- `tests/integration/*.c` — programas reales que se compilan y ejecutan;
+- `tests/integration/*.{c,s,S,m4}` — programas que se compilan y ejecutan;
   el código de salida esperado está en `<nombre>.expected`.
 - Cada error corregido añade una prueba de regresión.

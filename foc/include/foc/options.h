@@ -61,6 +61,9 @@ void FOC_options_print_version(FILE *out);
 /* Ensambla y enlaza mediante las herramientas del sistema. */
 bool FOC_toolchain_assemble(const FOCOptions *options, const char *asm_path,
                              const char *object_path, FILE *log);
+/* Preprocesa ensamblador con CPP o GNU M4 y escribe el resultado en un fichero. */
+bool FOC_toolchain_preprocess_assembly(const FOCOptions *options, const char *input_path,
+                                       const char *output_path, bool use_m4, FILE *log);
 bool FOC_toolchain_link(const FOCOptions *options, const char *output, char **objects,
                         size_t object_count, FILE *log);
 

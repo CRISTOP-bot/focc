@@ -22,3 +22,5 @@ echo "== Probando libc/stdio =="
 # shellcheck disable=SC2086
 "$CC" $CFLAGS libc/src/stdio.c tests/libc/test_stdio.c -o build/foc_stdio_tests
 ./build/foc_stdio_tests
+echo "== Pruebas de integracion =="
+sh ./tests/run-integration.sh

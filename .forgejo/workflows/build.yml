@@ -16,13 +16,13 @@ jobs:
       image: debian:stable
     steps:
       - name: Instalar las dependencias
-        run: apt-get update && apt-get install -y --no-install-recommends build-essential
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential m4
       - name: Clonar
         run: |
           git clone $FORGEJO_REPOSITORY foc
           cd foc
       - name: Configurar
-        run: cd foc && ./configure
+        run: cd foc && sh ./configure
       - name: Construir
         run: cd foc && make -j$(nproc)
       - name: Pruebas

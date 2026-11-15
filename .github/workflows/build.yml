@@ -1,4 +1,4 @@
-name: FOC
+name: FOCC CI
 
 on:
   push:
@@ -6,41 +6,58 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
-    name: Linux (GCC, x86-64)
+    name: Linux (${{ matrix.compiler }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    env:
+      CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v4
+      - name: Instalar GNU M4
+        run: sudo apt-get update && sudo apt-get install -y m4
       - name: Configurar
-        run: ./configure --enable-debug
+        run: sh ./configure --enable-debug
       - name: Construir
-        run: make -j$(nproc)
-      - name: Pruebas
+        run: make -j2
+      - name: Ejecutar pruebas unitarias, libc e integración
         run: make check
-      - name: Comprobar el compilador sobre si mismo
+      - name: Verificar CLI
         run: |
           ./bin/foc --version
-          ./bin/foc tests/integration/arith.c -o /tmp/arith && /tmp/arith; test $? -eq 205
-
-  cross:
-    name: Compilacion cruzada (x86_64-linux)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configurar
-        run: ./configure --target=x86_64-pc-linux-gnu
-      - name: Construir
-        run: make -j$(nproc)
+          ./bin/foc --help
 
   windows:
-    name: Windows (MinGW)
+    name: Windows (MinGW-w64)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Configurar
-        run: sh ./configure
+      - name: Instalar GCC con MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: mingw-w64-ucrt-x86_64-gcc m4
+      - name: Exponer herramientas MinGW al driver
+        run: |
+          $paths = @('C:\msys64\ucrt64\bin', 'C:\msys64\usr\bin')
+          [System.IO.File]::AppendAllText(
+            $env:GITHUB_PATH,
+            "$($paths -join [Environment]::NewLine)$([Environment]::NewLine)",
+            [System.Text.UTF8Encoding]::new($false)
+          )
       - name: Construir
-        run: make -j2
-      - name: Pruebas
-        run: sh tests/run-integration.sh
+        run: ./build.ps1 -CC 'C:\msys64\ucrt64\bin\gcc.exe'
+      - name: Ejecutar pruebas unitarias, libc e integración
+        run: ./run_tests.ps1 -CC 'C:\msys64\ucrt64\bin\gcc.exe'

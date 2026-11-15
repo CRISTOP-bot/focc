@@ -24,6 +24,10 @@
 *.so
 *.dylib
 
+# Fuentes de ensamblador de las pruebas de integración (no son artefactos).
+!/tests/integration/assembly.s
+!/tests/integration/assembly_cpp.S
+
 # Ficheros generados por configure
 /Makefile
 /config.status

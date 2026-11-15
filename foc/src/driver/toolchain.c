@@ -5,6 +5,7 @@
  * resto del compilador.
  */
 #include "foc/options.h"
+#include "foc/fs.h"
 #include "foc/proc.h"
 
 #include <stdio.h>
@@ -20,6 +21,15 @@ static void log_command(FILE *log, const char *program, char **args, size_t coun
         fprintf(log, " %s", args[i]);
     }
     fputc('\n', log);
+}
+
+static void print_process_diagnostics(const FOCProcResult *result) {
+    if (result->output && *result->output) {
+        fputs(result->output, stderr);
+    }
+    if (result->error && *result->error) {
+        fputs(result->error, stderr);
+    }
 }
 
 /* Busca una herramienta utilizable: debe existir en el PATH y responder a
@@ -72,9 +82,7 @@ bool FOC_toolchain_assemble(const FOCOptions *options, const char *asm_path,
     FOCProcResult result = FOC_proc_run(assembler, args, count);
     if (result.failed) {
         fprintf(stderr, "foc: fallo al ensamblar '%s'\n", asm_path);
-        if (result.output && *result.output) {
-            fputs(result.output, stderr);
-        }
+        print_process_diagnostics(&result);
         free(result.output);
         free(result.error);
         return false;
@@ -83,6 +91,86 @@ bool FOC_toolchain_assemble(const FOCOptions *options, const char *asm_path,
     free(result.error);
     (void)options;
     return true;
+}
+
+bool FOC_toolchain_preprocess_assembly(const FOCOptions *options, const char *input_path,
+                                       const char *output_path, bool use_m4, FILE *log) {
+    static const char *cpp_candidates[] = {"cc", "gcc", "clang", NULL};
+    static const char *m4_candidates[] = {"m4", NULL};
+    const char *program = find_tool(use_m4 ? m4_candidates : cpp_candidates);
+    if (!program) {
+        fprintf(stderr, use_m4 ? "foc: no se encuentra GNU M4 (m4)\n"
+                               : "foc: no se encuentra un preprocesador C (cc/gcc/clang)\n");
+        return false;
+    }
+
+    size_t capacity = 12 + 2 * (options->include_paths.len + options->system_include_paths.len +
+                                options->defines.len + options->undefines.len);
+    char **args = (char **)calloc(capacity, sizeof(char *));
+    if (!args) {
+        return false;
+    }
+    size_t count = 0;
+    if (use_m4) {
+        for (size_t i = 0; i < options->include_paths.len; i++) {
+            args[count++] = (char *)"-I";
+            args[count++] = *(char **)FOC_VEC_AT(&options->include_paths, char *, i);
+        }
+        for (size_t i = 0; i < options->system_include_paths.len; i++) {
+            args[count++] = (char *)"-I";
+            args[count++] = *(char **)FOC_VEC_AT(&options->system_include_paths, char *, i);
+        }
+        for (size_t i = 0; i < options->defines.len; i++) {
+            args[count++] = (char *)"-D";
+            args[count++] = *(char **)FOC_VEC_AT(&options->defines, char *, i);
+        }
+        for (size_t i = 0; i < options->undefines.len; i++) {
+            args[count++] = (char *)"-U";
+            args[count++] = *(char **)FOC_VEC_AT(&options->undefines, char *, i);
+        }
+    } else {
+        args[count++] = (char *)"-E";
+        args[count++] = (char *)"-P";
+        args[count++] = (char *)"-x";
+        args[count++] = (char *)"assembler-with-cpp";
+        for (size_t i = 0; i < options->include_paths.len; i++) {
+            args[count++] = (char *)"-I";
+            args[count++] = *(char **)FOC_VEC_AT(&options->include_paths, char *, i);
+        }
+        for (size_t i = 0; i < options->system_include_paths.len; i++) {
+            args[count++] = (char *)"-isystem";
+            args[count++] = *(char **)FOC_VEC_AT(&options->system_include_paths, char *, i);
+        }
+        for (size_t i = 0; i < options->defines.len; i++) {
+            args[count++] = (char *)"-D";
+            args[count++] = *(char **)FOC_VEC_AT(&options->defines, char *, i);
+        }
+        for (size_t i = 0; i < options->undefines.len; i++) {
+            args[count++] = (char *)"-U";
+            args[count++] = *(char **)FOC_VEC_AT(&options->undefines, char *, i);
+        }
+    }
+    args[count++] = (char *)input_path;
+    args[count] = NULL;
+
+    log_command(log, program, args, count);
+    FOCProcResult result = FOC_proc_run(program, args, count);
+    free(args);
+    if (result.failed) {
+        fprintf(stderr, "foc: fallo al preprocesar '%s'\n", input_path);
+        print_process_diagnostics(&result);
+        free(result.output);
+        free(result.error);
+        return false;
+    }
+
+    bool ok = result.output && FOC_fs_write_file(output_path, result.output, strlen(result.output));
+    if (!ok) {
+        fprintf(stderr, "foc: no se pudo escribir '%s'\n", output_path);
+    }
+    free(result.output);
+    free(result.error);
+    return ok;
 }
 
 /* Enlaza los objetos en `output`. */
@@ -134,9 +222,7 @@ bool FOC_toolchain_link(const FOCOptions *options, const char *output, char **ob
     bool ok = !result.failed;
     if (!ok) {
         fprintf(stderr, "foc: fallo al enlazar\n");
-        if (result.output && *result.output) {
-            fputs(result.output, stderr);
-        }
+        print_process_diagnostics(&result);
     }
     free(result.output);
     free(result.error);

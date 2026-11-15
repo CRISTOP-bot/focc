@@ -29,6 +29,15 @@ static const char *language_of(const FOCOptions *options, const char *path) {
     if (!strcmp(dot, ".i")) {
         return "c";
     }
+    if (!strcmp(dot, ".s")) {
+        return "assembler";
+    }
+    if (!strcmp(dot, ".S")) {
+        return "assembler-with-cpp";
+    }
+    if (!strcmp(dot, ".m4")) {
+        return "m4";
+    }
     if (!strcmp(dot, ".cpp") || !strcmp(dot, ".cc") || !strcmp(dot, ".cxx") ||
         !strcmp(dot, ".C") || !strcmp(dot, ".hpp")) {
         return "c++";
@@ -102,10 +111,138 @@ static void dump_ir(const FOCIRModule *module) {
     }
 }
 
+static bool is_assembly_language(const char *language) {
+    return !strcmp(language, "assembler") || !strcmp(language, "asm") ||
+           !strcmp(language, "assembler-with-cpp") || !strcmp(language, "asm-with-cpp") ||
+           !strcmp(language, "m4");
+}
+
+static char *temporary_assembly_path(const char *object_path) {
+    static unsigned long sequence;
+    size_t capacity = strlen(object_path) + 64;
+    for (size_t attempt = 0; attempt < 1000; attempt++) {
+        char *path = (char *)malloc(capacity);
+        if (!path) {
+            return NULL;
+        }
+        snprintf(path, capacity, "%s.foc-tmp-%lu.s", object_path, ++sequence);
+        if (!FOC_fs_exists(path)) {
+            return path;
+        }
+        free(path);
+    }
+    return NULL;
+}
+
+static bool compile_assembly_one(FOCOptions *options, FOCDiagEngine *diag, const char *input,
+                                 const char *language, char **out_object) {
+    bool use_cpp = !strcmp(language, "assembler-with-cpp") || !strcmp(language, "asm-with-cpp");
+    bool use_m4 = !strcmp(language, "m4");
+    bool preprocess = use_cpp || use_m4;
+
+    if (options->dependency_only) {
+        FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0011",
+                       "no se generan dependencias para entradas de ensamblador");
+        return false;
+    }
+
+    if (options->mode == FOC_MODE_PREPROCESS || options->mode == FOC_MODE_ASSEMBLY) {
+        char *output_path = options->output ? FOC_strdup(options->output)
+                                            : FOC_fs_replace_extension(input, ".s");
+        if (!output_path) {
+            FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0012",
+                           "no se pudo determinar la salida para '%s'", input);
+            return false;
+        }
+
+        bool ok;
+        if (preprocess) {
+            ok = FOC_toolchain_preprocess_assembly(options, input, output_path, use_m4,
+                                                   options->verbose ? stdout : NULL);
+        } else {
+            size_t length = 0;
+            char *data = FOC_fs_read_file(input, &length);
+            ok = data && FOC_fs_write_file(output_path, data, length);
+            if (!data) {
+                FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0006", "no se puede leer '%s'", input);
+            } else if (!ok) {
+                FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0013",
+                               "no se pudo escribir '%s'", output_path);
+            }
+            free(data);
+        }
+        if (!ok && preprocess) {
+            FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0014",
+                           "no se pudo preprocesar '%s'", input);
+        }
+        free(output_path);
+        return ok;
+    }
+
+    char *object_path = FOC_fs_replace_extension(input, ".o");
+    if (options->mode == FOC_MODE_COMPILE && options->output) {
+        free(object_path);
+        object_path = FOC_strdup(options->output);
+    }
+    if (!object_path) {
+        FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0012",
+                       "no se pudo determinar el objeto de '%s'", input);
+        return false;
+    }
+
+    char *asm_path;
+    if (preprocess) {
+        asm_path = temporary_assembly_path(object_path);
+    } else {
+        asm_path = FOC_strdup(input);
+    }
+    if (!asm_path) {
+        FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0012",
+                       "no se pudo preparar la entrada '%s'", input);
+        free(object_path);
+        return false;
+    }
+
+    bool ok = true;
+    if (preprocess) {
+        ok = FOC_toolchain_preprocess_assembly(options, input, asm_path, use_m4,
+                                               options->verbose ? stdout : NULL);
+        if (!ok) {
+            FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0014",
+                           "no se pudo preprocesar '%s'", input);
+        }
+    }
+    if (ok) {
+        ok = FOC_toolchain_assemble(options, asm_path, object_path,
+                                    options->verbose ? stdout : NULL);
+        if (!ok) {
+            FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0008",
+                           "no se pudo ensamblar '%s'", input);
+        }
+    }
+    if (preprocess) {
+        remove(asm_path);
+    }
+    free(asm_path);
+    if (!ok) {
+        free(object_path);
+        return false;
+    }
+    if (out_object) {
+        *out_object = object_path;
+    } else {
+        free(object_path);
+    }
+    return true;
+}
+
 /* Compila un fichero fuente hasta el objeto o el ejecutable. */
 static bool compile_one(FOCOptions *options, FOCDiagEngine *diag, FOCSourceMgr *sources,
                         const FOCTarget *target, const char *input, char **out_object) {
     const char *language = language_of(options, input);
+    if (is_assembly_language(language)) {
+        return compile_assembly_one(options, diag, input, language, out_object);
+    }
     if (strcmp(language, "c") != 0 && strcmp(language, "c++") != 0) {
         FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0004", "lenguaje no soportado: '%s'", language);
         return false;

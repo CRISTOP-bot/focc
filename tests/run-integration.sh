@@ -2,7 +2,7 @@
 # Pruebas de integracion de FOC: compila programas reales y comprueba el
 # codigo de salida esperado.
 #
-# Cada programa tests/integration/<nombre>.c tiene un fichero
+# Cada programa tests/integration/<nombre>.<c|s|S|m4> tiene un fichero
 # <nombre>.expected con el codigo de salida que debe producir.
 
 set -u
@@ -22,9 +22,10 @@ fi
 passed=0
 failed=0
 
-for source in tests/integration/*.c; do
+for source in tests/integration/*.c tests/integration/*.s tests/integration/*.S tests/integration/*.m4; do
     [ -e "$source" ] || continue
-    name=$(basename "$source" .c)
+    name=$(basename "$source")
+    name=${name%.*}
     expected_file="tests/integration/$name.expected"
     expected=0
     if [ -f "$expected_file" ]; then

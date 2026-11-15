@@ -1,5 +1,5 @@
 # Pruebas de integracion de FOC en Windows.
-# Compila cada programa de tests/integration y comprueba el codigo de salida.
+# Compila programas C/ASM/M4 de tests/integration y comprueba el codigo de salida.
 #
 #   powershell -ExecutionPolicy Bypass -File tests/run-integration.ps1
 
@@ -25,7 +25,9 @@ New-Item -ItemType Directory -Force -Path $outdir | Out-Null
 $passed = 0
 $failed = 0
 
-foreach ($source in Get-ChildItem (Join-Path $root "tests\integration") -Filter *.c) {
+$sources = Get-ChildItem (Join-Path $root "tests\integration") -File |
+    Where-Object { @(".c", ".s", ".S", ".m4") -contains $_.Extension }
+foreach ($source in $sources) {
     $name = $source.BaseName
     $expectedFile = Join-Path $root "tests\integration\$name.expected"
     $expected = 0

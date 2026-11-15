@@ -63,7 +63,7 @@ void FOC_options_print_help(FILE *out) {
             "  -nostdlib           No enlaza la biblioteca estandar\n"
             "  -static             Enlace estatico\n"
             "  -shared             Produce una biblioteca compartida\n"
-            "  -x <lenguaje>       Fuerza el lenguaje (c, c++, assembler)\n"
+            "  -x <lenguaje>       Fuerza c, c++, assembler, assembler-with-cpp o m4\n"
             "  -M -MM              Genera las dependencias del fichero\n"
             "  -MF <fichero>       Escribe las dependencias en <fichero>\n"
             "  -v                  Salida detallada\n"

@@ -7,8 +7,30 @@
 #include <string.h>
 
 #ifndef _WIN32
+#include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+static char *read_tmpfile(FILE *stream) {
+    if (fseek(stream, 0, SEEK_END) != 0) {
+        return NULL;
+    }
+    long length = ftell(stream);
+    if (length < 0 || fseek(stream, 0, SEEK_SET) != 0) {
+        return NULL;
+    }
+    char *data = (char *)malloc((size_t)length + 1);
+    if (!data) {
+        return NULL;
+    }
+    size_t read = fread(data, 1, (size_t)length, stream);
+    if (read != (size_t)length || ferror(stream)) {
+        free(data);
+        return NULL;
+    }
+    data[read] = '\0';
+    return data;
+}
 #endif
 
 FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
@@ -30,6 +52,12 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
     out_pipe = tmpfile();
     err_pipe = tmpfile();
     if (!out_pipe || !err_pipe) {
+        if (out_pipe) {
+            fclose(out_pipe);
+        }
+        if (err_pipe) {
+            fclose(err_pipe);
+        }
         free(argv);
         result.failed = true;
         return result;
@@ -50,6 +78,8 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
     FILE *pipe = _popen(command.data, "r");
     FOC_buf_free(&command);
     if (!pipe) {
+        fclose(out_pipe);
+        fclose(err_pipe);
         free(argv);
         result.failed = true;
         return result;
@@ -59,15 +89,19 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
     char *output = (char *)malloc(1);
     if (!output) {
         _pclose(pipe);
+        fclose(out_pipe);
+        fclose(err_pipe);
         free(argv);
         result.failed = true;
         return result;
     }
     output[0] = '\0';
     size_t read;
+    bool capture_failed = false;
     while ((read = fread(buffer, 1, sizeof(buffer), pipe)) > 0) {
         char *bigger = (char *)realloc(output, total + read + 1);
         if (!bigger) {
+            capture_failed = true;
             break;
         }
         output = bigger;
@@ -78,7 +112,7 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
     int status = _pclose(pipe);
     result.exit_code = status;
     result.output = output;
-    result.failed = status != 0;
+    result.failed = status != 0 || capture_failed;
     free(argv);
     fclose(out_pipe);
     fclose(err_pipe);
@@ -86,6 +120,8 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
 #else
     pid_t pid = fork();
     if (pid < 0) {
+        fclose(out_pipe);
+        fclose(err_pipe);
         free(argv);
         result.failed = true;
         return result;
@@ -97,11 +133,30 @@ FOCProcResult FOC_proc_run(const char *program, char **args, size_t arg_count) {
         _exit(127);
     }
     int status = 0;
-    waitpid(pid, &status, 0);
+    pid_t waited;
+    do {
+        waited = waitpid(pid, &status, 0);
+    } while (waited < 0 && errno == EINTR);
+    if (waited < 0) {
+        result.exit_code = -1;
+        result.failed = true;
+        fclose(out_pipe);
+        fclose(err_pipe);
+        free(argv);
+        return result;
+    }
+    result.exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    result.output = read_tmpfile(out_pipe);
+    result.error = read_tmpfile(err_pipe);
     fclose(out_pipe);
     fclose(err_pipe);
-    result.exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
-    result.failed = result.exit_code != 0;
+    result.failed = result.exit_code != 0 || !result.output || !result.error;
+    if (!result.output || !result.error) {
+        free(result.output);
+        free(result.error);
+        result.output = NULL;
+        result.error = NULL;
+    }
     free(argv);
     return result;
 #endif

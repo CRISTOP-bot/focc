@@ -47,6 +47,8 @@ No implementado o sin verificar:
       argumentos en `rcx rdx r8 r9` + sombra de 32 bytes + pilas en orden).
 - [x] Ensamblado y enlace mediante herramientas del sistema (`as`, `cc/gcc/
       clang` con sondeo por `PATH` y verificación con `--version`).
+- [ ] Entrada `.s`/`.S`/`.m4` integrada con GNU `as`, CPP y M4; hay pruebas de
+      integración, pendientes de ejecutar con el toolchain instalado.
 - [x] Ejecutables de prueba que se ejecutan y devuelven el código esperado.
 - [x] Aritmética, comparaciones, llamadas, acceso a memoria, arrays, structs
       por valor, llamadas a funciones y `sizeof`.

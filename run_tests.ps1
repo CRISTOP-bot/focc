@@ -53,15 +53,6 @@ if (-not (Test-Path ".\bin\foc.exe")) {
     exit 1
 }
 
-Write-Host "Compilando prueba de integracion"
-& ".\bin\foc.exe" "tests\integration\arith.c" "-o" "build\arith.exe"
+Write-Host "Ejecutando pruebas de integracion"
+& ".\tests\run-integration.ps1" -Foc ".\bin\foc.exe"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& ".\build\arith.exe"
-$programExit = $LASTEXITCODE
-if ($programExit -ne 220) {
-    Write-Error "La prueba de integracion esperaba el codigo 220 y obtuvo $programExit."
-    exit 1
-}
-
-Write-Host "Integracion correcta"
