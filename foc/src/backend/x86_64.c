@@ -611,7 +611,7 @@ bool FOC_emit_x86_64(FOCIRModule *module, const FOCTarget *target, char **out_te
 
     FOC_buf_printf(&em.text, "  .file 1 \"%s\"\n", "source");
     for (size_t i = 0; i < module->global_count; i++) {
-        FOCIRGlobal *global = &module->globals[i];
+        FOCIRGlobal *global = module->globals[i];
         if (global->is_extern && !global->data) {
             continue;
         }

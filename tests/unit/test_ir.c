@@ -56,7 +56,7 @@ void test_ir(void) {
     /* Variables globales. */
     module = build_module("int contador = 7;");
     CHECK_INT(module->global_count, 1);
-    CHECK_STR(module->globals[0].name, "contador");
-    CHECK_INT(module->globals[0].init_int, 7);
-    CHECK(module->globals[0].has_init);
+    CHECK_STR(module->globals[0]->name, "contador");
+    CHECK_INT(module->globals[0]->init_int, 7);
+    CHECK(module->globals[0]->has_init);
 }

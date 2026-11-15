@@ -131,7 +131,7 @@ typedef struct {
 typedef struct {
     FOCIRFunction **functions;
     size_t function_count;
-    FOCIRGlobal *globals;
+    FOCIRGlobal **globals;
     size_t global_count;
     int label_count;
 } FOCIRModule;

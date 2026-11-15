@@ -75,16 +75,20 @@ int FOC_ir_new_reg(FOCIRFunction *function, FOCIRType type) {
 int FOC_ir_new_label(FOCIRModule *module) { return module->label_count++; }
 
 FOCIRGlobal *FOC_ir_add_global(FOCIRModule *module, const char *name) {
-    FOCIRGlobal *globals =
-        (FOCIRGlobal *)realloc(module->globals, (module->global_count + 1) * sizeof(FOCIRGlobal));
+    FOCIRGlobal **globals =
+        (FOCIRGlobal **)realloc(module->globals, (module->global_count + 1) * sizeof(FOCIRGlobal *));
     if (!globals) {
         fprintf(stderr, "foc: agotamiento de memoria\n");
         abort();
     }
     module->globals = globals;
-    FOCIRGlobal *global = &module->globals[module->global_count++];
-    memset(global, 0, sizeof(FOCIRGlobal));
+    FOCIRGlobal *global = (FOCIRGlobal *)calloc(1, sizeof(FOCIRGlobal));
+    if (!global) {
+        fprintf(stderr, "foc: agotamiento de memoria\n");
+        abort();
+    }
     global->name = FOC_strdup(name ? name : "");
+    module->globals[module->global_count++] = global;
     return global;
 }
 
