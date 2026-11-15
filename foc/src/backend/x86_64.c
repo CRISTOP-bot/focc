@@ -238,8 +238,9 @@ static void emit_function(FOCEmitter *em, FOCIRFunction *function, size_t functi
             int size = type_size(inst->type);
             emit_load_value(em, &inst->lhs, inst->type);
             emit_load_into(em, &inst->rhs, FOC_IR_PTR, "%rcx", "%ecx");
-            FOC_buf_printf(&em->text, "  mov%s %s, (%%rcx)\n", suffix_for(size),
-                           size == 8 ? "%rax" : "%eax");
+            /* El registro fuente debe coincidir con el ancho del movimiento. */
+            const char *source_reg = size == 8 ? "%rax" : size == 4 ? "%eax" : size == 2 ? "%ax" : "%al";
+            FOC_buf_printf(&em->text, "  mov%s %s, (%%rcx)\n", suffix_for(size), source_reg);
             break;
         }
         case FOC_OP_ADD:
