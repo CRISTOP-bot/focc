@@ -3,6 +3,7 @@
  * Operaciones de 64 bits que algunos compiladores no generan de forma
  * nativa en todas las arquitecturas.
  */
+#include <stddef.h>
 
 unsigned long long __udivmoddi4(unsigned long long a, unsigned long long b,
                                 unsigned long long *remainder) {
