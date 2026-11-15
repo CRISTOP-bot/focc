@@ -459,7 +459,7 @@ static void emit_function(FOCEmitter *em, FOCIRFunction *function, size_t functi
                         in_register = true;
                     }
                 } else {
-                    if (int_count < 6) {
+                    if (int_count < 6 && register_count < 8 && em->abi->int_args[int_count] >= 0) {
                         in_register = true;
                     }
                 }
