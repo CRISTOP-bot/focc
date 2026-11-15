@@ -64,6 +64,12 @@ void test_parser(void) {
     unit = parse_text("int f(void) { for (int i = 0; i < 3; i++) { } return 0; }", &errors);
     CHECK_INT(errors, 0);
 
+    /* sizeof(expr) consume el cierre y sizeof(tipo) va por la otra rama. */
+    unit = parse_text("int f(void) { int a = 5; return sizeof(a); }", &errors);
+    CHECK_INT(errors, 0);
+    unit = parse_text("int f(void) { return sizeof(int); }", &errors);
+    CHECK_INT(errors, 0);
+
     /* Variable global. */
     unit = parse_text("int contador = 3;", &errors);
     CHECK_INT(errors, 0);

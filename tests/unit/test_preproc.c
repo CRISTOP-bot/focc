@@ -83,6 +83,15 @@ void test_preproc(void) {
     CHECK_STR(result, "int activo;");
     free(result);
 
+    /* defined(): la expansion no debe tragarse el resto del fichero. */
+    result = preprocess_text("#define FOO 1\n#if defined(FOO)\nint a;\n#endif\nint c;", &length);
+    CHECK_STR(result, "int a;int c;");
+    free(result);
+
+    result = preprocess_text("#if defined FOO\nint a;\n#endif\nint c;", &length);
+    CHECK_STR(result, "int c;");
+    free(result);
+
     result = preprocess_text("#if 0\nint no;\n#else\nint si;\n#endif", &length);
     CHECK_STR(result, "int si;");
     free(result);

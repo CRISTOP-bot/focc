@@ -133,8 +133,37 @@ static bool source_has_next(FOCPreproc *pp) {
     return false;
 }
 
+/* Consume los EOF de ficheros incluidos que queden al tope de la pila.
+ * El lexer inserta un FOC_TOK_EOF al final de cada fichero; en el flujo de
+ * preprocesado ese EOF solo termina el fichero actual, no la traducción. */
+static void pop_included_file_eof(FOCPreproc *pp) {
+    for (;;) {
+        FOCTokenSource *src = pp->source;
+        if (!src) {
+            return;
+        }
+        if (src->from_macro) {
+            /* El final de una expansion lo gestionan peek/next; aqui no se
+             * cruza la frontera de la macro. */
+            return;
+        }
+        bool exhausted = src->pos >= src->len;
+        bool at_file_eof =
+            !exhausted && src->tokens[src->pos].kind == FOC_TOK_EOF;
+        if (!exhausted && !at_file_eof) {
+            return;
+        }
+        if (!src->prev) {
+            /* El EOF del fichero principal termina el preprocesado. */
+            return;
+        }
+        source_pop(pp);
+    }
+}
+
 /* Devuelve el siguiente token disponible sin consumirlo. */
 static FOCToken *peek_token(FOCPreproc *pp) {
+    pop_included_file_eof(pp);
     FOCTokenSource *src = pp->source;
     while (src) {
         if (src->pos < src->len) {
@@ -156,6 +185,13 @@ static FOCToken next_token(FOCPreproc *pp) {
         FOCTokenSource *src = pp->source;
         if (!src) {
             break;
+        }
+        if (src->pos < src->len && src->tokens[src->pos].kind == FOC_TOK_EOF && !src->from_macro) {
+            if (src->prev) {
+                source_pop(pp);
+                continue;
+            }
+            return src->tokens[src->pos++];
         }
         if (src->pos < src->len) {
             return src->tokens[src->pos++];
@@ -937,7 +973,14 @@ static long long evaluate_condition(FOCPreproc *pp) {
                 }
                 char buffer[8];
                 snprintf(buffer, sizeof(buffer), "%d", value);
-                FOCToken tok = make_token(FOC_TOK_INT, buffer, strlen(buffer), line.tokens[i]);
+                size_t buffer_len = strlen(buffer);
+                /* El texto viaja en el token resuelto: se copia a heap. */
+                char *text_copy = (char *)malloc(buffer_len + 1);
+                if (!text_copy) {
+                    return 0;
+                }
+                memcpy(text_copy, buffer, buffer_len + 1);
+                FOCToken tok = make_token(FOC_TOK_INT, text_copy, buffer_len, line.tokens[i]);
                 buf_push(&resolved, tok);
                 i = j - 1;
                 continue;
