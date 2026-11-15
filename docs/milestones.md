@@ -27,6 +27,11 @@ Verificado por las pruebas existentes:
       `#pragma once`, `#error`, `#line`, `#warning`, `#`/`##`, `__LINE__`,
       `__FILE__`, `__FOC__` y expansiones anidadas.
 - [x] Parser de declaraciones, expresiones y sentencias (descenso recursivo).
+- [x] Declaraciones con varios declaradores (cadena `FOCDecl::next`) y
+      declaración dentro del `for-init`.
+- [x] `sizeof(expr)` y `sizeof(tipo)`.
+- [x] Prototipos de función visibles en la tabla de símbolos desde
+      ficheros incluidos (`#include` resuelve y `<...>` concatena bien).
 - [x] AST con spans y sistema de tipos (punteros, arrays, funciones, struct,
       union, enum, calificadores, `sizeof`, conversión de tipos).
 - [x] Ámbitos y tabla de símbolos; análisis semántico con errores.
@@ -47,8 +52,10 @@ No implementado o sin verificar:
       argumentos en `rcx rdx r8 r9` + sombra de 32 bytes + pilas en orden).
 - [x] Ensamblado y enlace mediante herramientas del sistema (`as`, `cc/gcc/
       clang` con sondeo por `PATH` y verificación con `--version`).
-- [ ] Entrada `.s`/`.S`/`.m4` integrada con GNU `as`, CPP y M4; hay pruebas de
-      integración, pendientes de ejecutar con el toolchain instalado.
+- [x] Entrada `.s`/`.S` integrada con GNU `as` y el preprocesador de
+      ensamblador; hay pruebas de integración (`assembly` código 7,
+      `assembly_cpp` código 8). La prueba M4 se omite con OMITIDO cuando
+      GNU M4 no está instalado (no falla).
 - [x] Ejecutables de prueba que se ejecutan y devuelven el código esperado.
 - [x] Aritmética, comparaciones, llamadas, acceso a memoria, arrays, structs
       por valor, llamadas a funciones y `sizeof`.
@@ -71,7 +78,14 @@ No implementado:
 - [ ] mem2reg, inlining, propagación de constantes, DCE global, O2/O3.
 - [ ] Benchmarks comparativos (no medidos, nada de afirmaciones).
 
-## Hito 5 — Compatibilidad con C real — NO EMPEZADO
+## Hito 5 — Compatibilidad con C real — PARCIAL
+
+- [x] `foc` compila `libcc1/src/passes.c` completo a objeto x86-64
+      (funciones `FOC_opt_constant_fold`, `FOC_opt_dead_code`,
+      `FOC_opt_copy_propagation` con símbolos reales).
+- [ ] Self-host: `diag.c` genera `mov` inválidas para llamadas variádicas
+      (`fprintf` con seis argumentos); está en investigación.
+- [ ] Suite de conformidad C (no iniciada).
 
 ## Hito 6 — C++ — NO EMPEZADO
 
