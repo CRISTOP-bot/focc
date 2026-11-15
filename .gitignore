@@ -1,5 +1,8 @@
 # FOC — configuracion de Git.
 
+# Directorio de trabajo local (scratch del desarrollador)
+/build/
+
 # Binarios generados
 /bin/foc
 /bin/foc.exe
