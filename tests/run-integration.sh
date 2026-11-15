@@ -22,6 +22,21 @@ fi
 passed=0
 failed=0
 
+for option in --help -h; do
+    "$FOC" "$option" > "$outdir/help.log" 2>&1
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        echo "FALLO  $option: se esperaba el codigo 0 pero se obtuvo $status"
+        failed=$((failed + 1))
+    elif ! grep -q '^Uso: foc ' "$outdir/help.log"; then
+        echo "FALLO  $option: no se mostro la ayuda"
+        failed=$((failed + 1))
+    else
+        echo "OK     $option (codigo $status)"
+        passed=$((passed + 1))
+    fi
+done
+
 for source in tests/integration/*.c tests/integration/*.s tests/integration/*.S tests/integration/*.m4; do
     [ -e "$source" ] || continue
     name=$(basename "$source")
