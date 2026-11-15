@@ -123,6 +123,7 @@ void FOC_opt_constant_fold(FOCIRFunction *function) {
             long long b = rhs_value;
             long long result = 0;
             bool boolean = false;
+            bool skip_fold = false;
             switch (inst->op) {
             case FOC_OP_ADD:
                 result = a + b;
@@ -135,13 +136,15 @@ void FOC_opt_constant_fold(FOCIRFunction *function) {
                 break;
             case FOC_OP_DIV:
                 if (b == 0) {
-                    goto no_fold;
+                    skip_fold = true;
+                    break;
                 }
                 result = a / b;
                 break;
             case FOC_OP_MOD:
                 if (b == 0) {
-                    goto no_fold;
+                    skip_fold = true;
+                    break;
                 }
                 result = a % b;
                 break;
@@ -196,14 +199,15 @@ void FOC_opt_constant_fold(FOCIRFunction *function) {
             default:
                 break;
             }
+            if (skip_fold) {
+                break;
+            }
             inst->op = FOC_OP_CONST;
             inst->lhs.imm = result;
             map.is_const[inst->dest] = true;
             map.is_float[inst->dest] = false;
             map.value[inst->dest] = result;
             (void)boolean;
-            break;
-        no_fold:
             break;
         }
         default:
@@ -300,7 +304,10 @@ void FOC_opt_copy_propagation(FOCIRFunction *function) {
     /* Sustitucion de usos. */
     for (size_t i = 0; i < function->inst_count; i++) {
         FOCIRInst *inst = FOC_ir_inst_at(function, i);
-        FOCIRValue *values[3] = {&inst->lhs, &inst->rhs, &inst->third};
+        FOCIRValue *values[3];
+        values[0] = &inst->lhs;
+        values[1] = &inst->rhs;
+        values[2] = &inst->third;
         for (int v = 0; v < 3; v++) {
             if (values[v]->reg >= 0 && values[v]->reg < function->vreg_count) {
                 values[v]->reg = alias[values[v]->reg];
