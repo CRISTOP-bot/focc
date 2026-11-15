@@ -83,8 +83,11 @@ No implementado:
 - [x] `foc` compila `libcc1/src/passes.c` completo a objeto x86-64
       (funciones `FOC_opt_constant_fold`, `FOC_opt_dead_code`,
       `FOC_opt_copy_propagation` con símbolos reales).
-- [ ] Self-host: `diag.c` genera `mov` inválidas para llamadas variádicas
-      (`fprintf` con seis argumentos); está en investigación.
+- [x] `foc` compila `foc/src/core/diag.c` completo a objeto x86-64
+      (llamadas variádicas como `fprintf` con seis argumentos).
+- [ ] Self-host: falta la capa de plataforma de `foc/src/core/fs.c`
+      (cabeceras `sys/stat.h`, `direct.h` y extensiones del CRT como
+      `_fullpath` no existen en la libc de FOC).
 - [ ] Suite de conformidad C (no iniciada).
 
 ## Hito 6 — C++ — NO EMPEZADO

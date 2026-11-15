@@ -41,15 +41,21 @@ proyecto sea pre-alpha (la compatibilidad declarada llegará con la 1.0).
 - Runner de integración: reintento de enlace ante bloqueos transitorios
   del antivirus; omisión honesta del fixture M4 sin GNU M4; lista
   blanca de extensiones.
+- Backend: la capacidad de registros de la ABI se respeta al clasificar
+  argumentos; en Windows x64 solo `rcx rdx r8 r9` se asignan a
+  registros (antes se leían `int_regs[-1]` y se generaban instrucciones
+  inválidas en cualquier llamada con más de cuatro argumentos enteros,
+  p. ej. `fprintf` de seis argumentos).
 - `libcc1/passes.c` ahora compila completo con `foc` a un objeto
   x86-64 (las funciones `FOC_opt_constant_fold`, `FOC_opt_dead_code`,
   `FOC_opt_copy_propagation` existen y enlazan).
+- `foc/src/core/diag.c` compila completo con `foc` a un objeto x86-64.
 
 ### Conocido
 
-- El autoensamblado (self-host) **aún no funciona**: `diag.c` genera
-  instrucciones `mov` inválidas para llamadas variádicas (p. ej.
-  `fprintf` con seis argumentos); está en investigación en el backend.
+- El autoensamblado (self-host) **aún no funciona**: `foc/src/core/fs.c`
+  necesita cabeceras de plataforma (`sys/stat.h`, `direct.h`, `_fullpath`)
+  que la libc de FOC aún no provee; falta además la suite de conformidad C.
 - `goto` no está soportado (E0419). Sin ABI System V, sin punto flotante
   en el backend, `switch` incompleto, sin cobertura de conformidad.
 
