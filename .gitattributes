@@ -1,0 +1,29 @@
+# FOCC — atributos de Git.
+# Normaliza los ficheros de texto y marca los binarios explicitamente.
+
+* text=auto
+
+# Codigo y documentacion: LF siempre
+*.c              text eol=lf
+*.h              text eol=lf
+*.s              text eol=lf
+*.S              text eol=lf
+*.m4             text eol=lf
+*.expected       text eol=lf
+*.md             text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+*.sh             text eol=lf
+
+# Scripts de Windows: CRLF
+*.ps1            text eol=crlf
+*.bat            text eol=crlf
+
+# Binarios
+*.exe            binary
+*.o              binary
+*.obj            binary
+*.a              binary
+*.lib            binary
+*.dll            binary
+*.so             binary
