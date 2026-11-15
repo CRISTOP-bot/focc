@@ -32,7 +32,7 @@
 !/tests/integration/assembly_cpp.S
 
 # Ficheros generados por configure
-/Makefile
+# (Makefile es mantenido a mano, no generado; por eso se versiona).
 /config.status
 /config.log
 
