@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         FOC_options_print_help(stdout);
         FOC_options_free(&options);
         FOC_arena_free(&arena);
-        return 0;
+        return 1;
     }
     if (options.print_version) {
         FOC_options_print_version(stdout);
