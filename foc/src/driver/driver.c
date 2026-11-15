@@ -134,6 +134,21 @@ static char *temporary_assembly_path(const char *object_path) {
     return NULL;
 }
 
+/* Ruta temporal para el objeto intermedio en modo de enlace. */
+static char *temporary_object_path(void) {
+    static unsigned long sequence;
+    sequence++;
+    for (size_t attempt = 0; attempt < 10000; attempt++) {
+        char path[64];
+        snprintf(path, sizeof(path), "foc-tmp-%lu.o", sequence);
+        if (!FOC_fs_exists(path)) {
+            return FOC_strdup(path);
+        }
+        sequence++;
+    }
+    return NULL;
+}
+
 static bool compile_assembly_one(FOCOptions *options, FOCDiagEngine *diag, const char *input,
                                  const char *language, char **out_object) {
     bool use_cpp = !strcmp(language, "assembler-with-cpp") || !strcmp(language, "asm-with-cpp");
@@ -179,10 +194,14 @@ static bool compile_assembly_one(FOCOptions *options, FOCDiagEngine *diag, const
         return ok;
     }
 
-    char *object_path = FOC_fs_replace_extension(input, ".o");
+    char *object_path;
     if (options->mode == FOC_MODE_COMPILE && options->output) {
-        free(object_path);
         object_path = FOC_strdup(options->output);
+    } else if (options->mode == FOC_MODE_LINK) {
+        /* En modo de enlace el objeto es temporal y se borra tras enlazar. */
+        object_path = temporary_object_path();
+    } else {
+        object_path = FOC_fs_replace_extension(input, ".o");
     }
     if (!object_path) {
         FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0012",
@@ -365,37 +384,38 @@ static bool compile_one(FOCOptions *options, FOCDiagEngine *diag, FOCSourceMgr *
         return false;
     }
 
-    char *base = FOC_fs_basename(input);
-    char *asm_path = FOC_fs_replace_extension(input, ".s");
     if (options->mode == FOC_MODE_ASSEMBLY) {
-        if (options->output) {
-            FOC_fs_write_file(options->output, assembly, strlen(assembly));
-        } else {
-            FOC_fs_write_file(asm_path, assembly, strlen(assembly));
+        char *asm_out = options->output ? FOC_strdup(options->output)
+                                        : FOC_fs_replace_extension(input, ".s");
+        if (asm_out) {
+            FOC_fs_write_file(asm_out, assembly, strlen(assembly));
+            free(asm_out);
         }
-        free(asm_path);
-        free(base);
         free(assembly);
         return true;
     }
 
-    char *object_path = FOC_fs_replace_extension(input, ".o");
+    char *object_path;
     if (options->mode == FOC_MODE_COMPILE && options->output) {
-        free(object_path);
         object_path = FOC_strdup(options->output);
+    } else if (options->mode == FOC_MODE_LINK) {
+        /* En modo de enlace el objeto es temporal y se borra tras enlazar. */
+        object_path = temporary_object_path();
+    } else {
+        object_path = FOC_fs_replace_extension(input, ".o");
     }
+    char *asm_path = temporary_assembly_path(object_path);
     FOC_fs_write_file(asm_path, assembly, strlen(assembly));
     free(assembly);
 
     bool ok = FOC_toolchain_assemble(options, asm_path, object_path, options->verbose ? stdout : NULL);
+    remove(asm_path);
     free(asm_path);
     if (!ok) {
         FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0008", "no se pudo ensamblar '%s'", input);
         free(object_path);
-        free(base);
         return false;
     }
-    free(base);
     if (out_object) {
         *out_object = object_path;
     } else {
@@ -429,6 +449,15 @@ int FOC_driver_run(FOCOptions *options, FOCDiagEngine *diag, FOCSourceMgr *sourc
         const char *input = *(char **)FOC_VEC_AT(&options->inputs, char *, i);
         char *object = NULL;
         if (!compile_one(options, diag, sources, &target, input, &object)) {
+            if (options->mode == FOC_MODE_LINK) {
+                for (size_t j = 0; j < objects.len; j++) {
+                    char *object_file = *(char **)FOC_VEC_AT(&objects, char *, j);
+                    if (object_file) {
+                        remove(object_file);
+                        free(object_file);
+                    }
+                }
+            }
             FOC_vec_free(&objects);
             return 1;
         }
@@ -439,17 +468,28 @@ int FOC_driver_run(FOCOptions *options, FOCDiagEngine *diag, FOCSourceMgr *sourc
     }
 
     if (options->mode != FOC_MODE_LINK) {
+        for (size_t i = 0; i < objects.len; i++) {
+            /* -c: los .o son la salida pedida; solo se libera la cadena. */
+            free(*(char **)FOC_VEC_AT(&objects, char *, i));
+        }
         FOC_vec_free(&objects);
         return FOC_diag_has_errors(diag) ? 1 : 0;
     }
 
-    /* Enlazado. */
+    /* Enlazado. En modo enlace los .o son temporales: se borran siempre. */
     char *output = options->output ? FOC_strdup(options->output)
                                    : FOC_strdup(target.os == FOC_OS_WINDOWS ? "a.exe" : "a.out");
     char **object_list = (char **)objects.data;
     bool ok = FOC_toolchain_link(options, output, object_list, objects.len,
                                  options->verbose ? stdout : NULL);
     free(output);
+    for (size_t i = 0; i < objects.len; i++) {
+        char *object = *(char **)FOC_VEC_AT(&objects, char *, i);
+        if (object) {
+            remove(object);
+            free(object);
+        }
+    }
     FOC_vec_free(&objects);
     if (!ok) {
         FOC_diag_error(diag, (FOCSpan){-1, 0, 0}, "E0010", "no se pudo enlazar");

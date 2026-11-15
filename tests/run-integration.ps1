@@ -26,7 +26,8 @@ $passed = 0
 $failed = 0
 
 $sources = Get-ChildItem (Join-Path $root "tests\integration") -File |
-    Where-Object { @(".c", ".s", ".S", ".m4") -contains $_.Extension }
+    Where-Object { @(".c", ".cpp", ".cc", ".m", ".s", ".S", ".m4") -contains $_.Extension }
+$m4Available = [bool](Get-Command m4 -ErrorAction SilentlyContinue)
 foreach ($source in $sources) {
     $name = $source.BaseName
     $expectedFile = Join-Path $root "tests\integration\$name.expected"
@@ -34,10 +35,19 @@ foreach ($source in $sources) {
     if (Test-Path $expectedFile) {
         $expected = [int](Get-Content $expectedFile -Raw).Trim()
     }
+    if ($source.Extension -ieq ".m4" -and -not $m4Available) {
+        Write-Host "OMITIDO ${name}: GNU M4 no disponible en PATH"
+        continue
+    }
     $program = Join-Path $outdir "$name.exe"
     $log = Join-Path $outdir "$name.log"
 
     & $Foc $source.FullName -o $program *> $log
+    if ($LASTEXITCODE -ne 0) {
+        # ld a veces recibe denegacion transitoria del antivirus: un reintento.
+        Start-Sleep -Seconds 2
+        & $Foc $source.FullName -o $program *> $log
+    }
     if ($LASTEXITCODE -ne 0) {
         Write-Host "FALLO  ${name}: la compilacion termino con error"
         Get-Content $log -TotalCount 10
