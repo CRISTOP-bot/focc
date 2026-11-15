@@ -1,0 +1,46 @@
+# FOC — configuracion de Git.
+
+# Binarios generados
+/bin/foc
+/bin/foc.exe
+/bin/focdep
+/bin/focdep.exe
+/bin/foccount
+/bin/foccount.exe
+/build/*.exe
+/build/foc_tests
+/build/foc_stdio_tests
+/build/arith
+/build/arith.exe
+/build/*.log
+/build/**/*.log
+/lib/*.a
+*.o
+*.obj
+*.s
+*.a
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ficheros generados por configure
+/Makefile
+/config.status
+/config.log
+
+# Resultados de pruebas
+/tests/out/*
+!/tests/out/.*
+*.tmp
+
+# Editores
+*.swp
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# No ocultar archivos o carpetas con prefijo punto.
+!.*

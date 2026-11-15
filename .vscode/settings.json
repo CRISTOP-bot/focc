@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "*.h": "c",
+        "*.c": "c"
+    },
+    "files.exclude": {
+        "**/build": true,
+        "**/bin": true,
+        "**/lib": true
+    },
+    "search.exclude": {
+        "**/build": true,
+        "**/bin": true,
+        "**/lib": true
+    },
+    "C_Cpp.default.compilerPath": "gcc",
+    "C_Cpp.default.cppStandard": "c++17",
+    "editor.formatOnSave": false,
+    "editor.rulers": [100],
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+}

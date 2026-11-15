@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "FOC",
+            "includePath": [
+                "${workspaceFolder}/foc/include",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/libc/include"
+            ],
+            "defines": [],
+            "cStandard": "c11",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

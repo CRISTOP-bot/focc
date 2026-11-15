@@ -1,0 +1,46 @@
+name: FOC
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: Linux (GCC, x86-64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar
+        run: ./configure --enable-debug
+      - name: Construir
+        run: make -j$(nproc)
+      - name: Pruebas
+        run: make check
+      - name: Comprobar el compilador sobre si mismo
+        run: |
+          ./bin/foc --version
+          ./bin/foc tests/integration/arith.c -o /tmp/arith && /tmp/arith; test $? -eq 205
+
+  cross:
+    name: Compilacion cruzada (x86_64-linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar
+        run: ./configure --target=x86_64-pc-linux-gnu
+      - name: Construir
+        run: make -j$(nproc)
+
+  windows:
+    name: Windows (MinGW)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar
+        run: sh ./configure
+      - name: Construir
+        run: make -j2
+      - name: Pruebas
+        run: sh tests/run-integration.sh

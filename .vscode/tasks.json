@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "FOC: construir",
+            "type": "shell",
+            "command": "./build.sh",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "build.ps1"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "FOC: pruebas",
+            "type": "shell",
+            "command": "make check",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "run_tests.ps1"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "FOC: construir",
+            "problemMatcher": []
+        },
+        {
+            "label": "FOC: compilar un programa de ejemplo",
+            "type": "shell",
+            "command": "./bin/foc tests/integration/arith.c -o build/arith",
+            "windows": {
+                "command": "bin\\foc.exe",
+                "args": [
+                    "tests\\integration\\arith.c",
+                    "-o",
+                    "build\\arith.exe"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "FOC: construir",
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

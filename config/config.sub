@@ -1,0 +1,57 @@
+#!/bin/sh
+# FOC — config.sub: normaliza un triple de destino.
+#
+# Version propia y simplificada: valida la forma <arch>-<vendor>-<os>-<env>
+# y devuelve el triple normalizado.
+
+if [ $# -ne 1 ]; then
+    echo "config.sub: se espera exactamente un argumento" >&2
+    exit 1
+fi
+
+triple=$1
+case "$triple" in
+- | "")
+    echo "config.sub: triple vacio" >&2
+    exit 1
+    ;;
+esac
+
+arch=$(echo "$triple" | cut -d- -f1)
+vendor=$(echo "$triple" | cut -d- -f2)
+os=$(echo "$triple" | cut -d- -f3)
+env=$(echo "$triple" | cut -d- -f4)
+
+case "$arch" in
+i386 | i486 | i586 | i686 | x86) arch=i386 ;;
+x86_64 | amd64 | x64) arch=x86_64 ;;
+aarch64 | arm64) arch=aarch64 ;;
+arm | armv7 | armv7l) arch=arm ;;
+riscv32) arch=riscv32 ;;
+riscv64) arch=riscv64 ;;
+wasm32) arch=wasm32 ;;
+wasm64) arch=wasm64 ;;
+*)
+    echo "config.sub: arquitectura desconocida: $arch" >&2
+    exit 1
+    ;;
+esac
+
+case "$os" in
+linux | darwin | freebsd | netbsd | openbsd | dragonfly | solaris | windows | mingw32 | msvc) ;;
+*) os=unknown ;;
+esac
+
+if [ -z "$vendor" ]; then
+    vendor=pc
+fi
+if [ -z "$env" ]; then
+    case "$os" in
+    linux) env=gnu ;;
+    windows) env=msvc ;;
+    darwin) env=darwin ;;
+    *) env=unknown ;;
+    esac
+fi
+
+echo "$arch-$vendor-$os-$env"

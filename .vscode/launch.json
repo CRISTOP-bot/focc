@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FOC: depurar el compilador",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/foc",
+            "args": ["--dump-ir", "${file}"],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "FOC: construir",
+            "MIMode": "gdb",
+            "externalConsole": false,
+            "setupCommands": [
+                {
+                    "description": "Ensamblado con informacion de depuracion",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "FOC: compilar y ejecutar el fichero actual",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/${fileBasenameNoExtension}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "FOC: compilar un programa de ejemplo",
+            "MIMode": "gdb",
+            "externalConsole": false
+        }
+    ]
+}

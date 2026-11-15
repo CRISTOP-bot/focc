@@ -1,0 +1,52 @@
+#!/bin/sh
+# FOC — config.guess: adivina el triple del anfitrion.
+#
+# Version propia y simplificada: devuelve <arquitectura>-<vendor>-<sistema>.
+# Usa uname cuando esta disponible y permite forzar el valor con FOC_HOST.
+
+guess_triple() {
+    os=$(uname -s 2>/dev/null || echo unknown)
+    arch=$(uname -m 2>/dev/null || echo unknown)
+    cpu=$(uname -p 2>/dev/null || echo unknown)
+
+    case "$os" in
+    Linux) os=linux; vendor=pc; env=gnu ;;
+    Darwin) os=darwin; vendor=apple; env=darwin ;;
+    FreeBSD) os=freebsd; vendor=pc; env=gnu ;;
+    NetBSD) os=netbsd; vendor=pc; env=gnu ;;
+    OpenBSD) os=openbsd; vendor=pc; env=gnu ;;
+    DragonFly) os=dragonfly; vendor=pc; env=gnu ;;
+    SunOS) os=solaris; vendor=sun; env=gnu ;;
+    CYGWIN* | MINGW* | MSYS*) os=windows; vendor=pc; env=msvc ;;
+    AIX) os=aix; vendor=ibm; env=gnu ;;
+    *) os=unknown; vendor=unknown; env=unknown ;;
+    esac
+
+    case "$arch" in
+    x86_64 | amd64) arch=x86_64 ;;
+    i?86) arch=i386 ;;
+    aarch64 | arm64) arch=aarch64 ;;
+    armv7* | armv8l) arch=arm ;;
+    riscv32) arch=riscv32 ;;
+    riscv64) arch=riscv64 ;;
+    *) arch=unknown ;;
+    esac
+
+    # En PowerShell la variable de entorno CPU lleva el nombre real.
+    if [ "$arch" = unknown ] && [ -n "$cpu" ]; then
+        case "$cpu" in
+        x86_64 | amd64) arch=x86_64 ;;
+        i?86) arch=i386 ;;
+        aarch64 | arm64) arch=aarch64 ;;
+        esac
+    fi
+
+    echo "$arch-$vendor-$os-$env"
+}
+
+if [ -n "$FOC_HOST" ]; then
+    echo "$FOC_HOST"
+    exit 0
+fi
+
+guess_triple

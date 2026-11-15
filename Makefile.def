@@ -1,0 +1,96 @@
+# FOC — Makefile.def
+# Lista de fuentes y componentes de FOC.
+#
+# El arbol de fuentes es:
+#   foc/src/core       utilidades portables
+#   foc/src/frontend   lexer, preprocesador, parser, AST, tipos
+#   foc/src/ir         representacion intermedia y lowering
+#   foc/src/optimizer  optimizaciones sobre la IR
+#   foc/src/backend    backends por arquitectura
+#   foc/src/driver     CLI y orquestacion del pipeline
+
+FOC_CORE_SOURCES = \
+	foc/src/core/util.c \
+	foc/src/core/map.c \
+	foc/src/core/source.c \
+	foc/src/core/diag.c \
+	foc/src/core/platform.c \
+	foc/src/core/fs.c \
+	foc/src/core/proc.c
+
+FOC_FRONTEND_SOURCES = \
+	foc/src/frontend/lexer.c \
+	foc/src/frontend/preproc.c \
+	foc/src/frontend/parser.c \
+	foc/src/frontend/ast.c \
+	foc/src/frontend/types.c \
+	foc/src/frontend/sema.c
+
+FOC_IR_SOURCES = \
+	foc/src/ir/ir.c \
+	foc/src/ir/irgen.c
+
+FOC_OPTIMIZER_SOURCES = \
+	foc/src/optimizer/passes.c \
+	libcc1/src/passes.c
+
+FOC_BACKEND_SOURCES = \
+	foc/src/backend/x86_64.c \
+	foc/src/backend/abi.c
+
+FOC_DRIVER_SOURCES = \
+	foc/src/driver/driver.c \
+	foc/src/driver/options.c \
+	foc/src/driver/toolchain.c \
+	foc/src/driver/main.c
+
+FOC_SOURCES = \
+	$(FOC_CORE_SOURCES) \
+	$(FOC_FRONTEND_SOURCES) \
+	$(FOC_IR_SOURCES) \
+	$(FOC_OPTIMIZER_SOURCES) \
+	$(FOC_BACKEND_SOURCES) \
+	$(FOC_DRIVER_SOURCES)
+
+FOC_HEADERS = \
+	foc/include/foc/foc.h \
+	foc/include/foc/map.h \
+	foc/include/foc/source.h \
+	foc/include/foc/diag.h \
+	foc/include/foc/platform.h \
+	foc/include/foc/fs.h \
+	foc/include/foc/proc.h \
+	foc/include/foc/lexer.h \
+	foc/include/foc/preproc.h \
+	foc/include/foc/ast.h \
+	foc/include/foc/types.h \
+	foc/include/foc/parser.h \
+	foc/include/foc/sema.h \
+	foc/include/foc/ir.h \
+	foc/include/foc/optimizer.h \
+	foc/include/foc/backend.h \
+	foc/include/foc/options.h \
+	foc/include/foc/driver.h
+
+LIBC_SOURCES = \
+	libc/src/string.c \
+	libc/src/stdio.c
+
+LIBGCC_SOURCES = \
+	libgcc/src/divmod.c
+
+LIBCC1_SOURCES = \
+	libcc1/src/passes.c
+
+TOOLS_SOURCES = \
+	tools/src/focdep.c \
+	tools/src/foccount.c
+
+TEST_SOURCES = \
+	tests/unit/test_main.c \
+	tests/unit/test_lexer.c \
+	tests/unit/test_parser.c \
+	tests/unit/test_types.c \
+	tests/unit/test_preproc.c \
+	tests/unit/test_ir.c \
+	tests/unit/test_backend.c

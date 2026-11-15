@@ -1,0 +1,210 @@
+#!/bin/sh
+# FOC — configuracion del arbol de fuentes.
+#
+# Script propio (no generado por autoconf) que detecta el anfitrion, el
+# compilador y las opciones de instalacion, y genera `Makefile` a partir de
+# `Makefile.in`.
+#
+# Uso: ./configure [opciones]
+#   --prefix=DIR        prefijo de instalacion (por defecto /usr/local)
+#   --target=TRIPLE     triple de destino de la compilacion
+#   --host=TRIPLE       triple del anfitrion
+#   --enable-debug      compilacion con simbolos y aserciones
+#   --disable-assert    desactiva las aserciones
+#   --with-as=PATH      ensamblador a usar
+#   --with-ld=PATH      enlazador a usar
+#   CC=... CFLAGS=...   se respetan las variables de entorno
+
+set -e
+
+srcdir=$(cd "$(dirname "$0")" && pwd)
+builddir=$(pwd)
+
+prefix=/usr/local
+exec_prefix=""
+bindir=""
+libdir=""
+includedir=""
+datadir=""
+mandir=""
+target=""
+host=""
+enable_debug=no
+enable_assert=yes
+with_as=""
+with_ld=""
+
+for arg in "$@"; do
+    case "$arg" in
+    --prefix=*) prefix=${arg#*=} ;;
+    --exec-prefix=*) exec_prefix=${arg#*=} ;;
+    --bindir=*) bindir=${arg#*=} ;;
+    --libdir=*) libdir=${arg#*=} ;;
+    --includedir=*) includedir=${arg#*=} ;;
+    --datadir=*) datadir=${arg#*=} ;;
+    --mandir=*) mandir=${arg#*=} ;;
+    --target=*) target=${arg#*=} ;;
+    --host=*) host=${arg#*=} ;;
+    --enable-debug) enable_debug=yes ;;
+    --disable-debug) enable_debug=no ;;
+    --enable-assert) enable_assert=yes ;;
+    --disable-assert) enable_assert=no ;;
+    --with-as=*) with_as=${arg#*=} ;;
+    --with-ld=*) with_ld=${arg#*=} ;;
+    --help | -h)
+        cat <<'EOF'
+Uso: ./configure [opciones]
+
+  --prefix=DIR        prefijo de instalacion
+  --target=TRIPLE     triple de destino (por defecto, el del anfitrion)
+  --host=TRIPLE       triple del anfitrion
+  --enable-debug      construye con simbolos de depuracion
+  --disable-assert    desactiva las aserciones en tiempo de ejecucion
+  --with-as=PATH      ensamblador del sistema
+  --with-ld=PATH      enlazador del sistema
+EOF
+        exit 0
+        ;;
+    *)
+        echo "configure: opcion desconocida: $arg" >&2
+        exit 1
+        ;;
+    esac
+done
+
+: "${exec_prefix:=$prefix}"
+: "${bindir:=$exec_prefix/bin}"
+: "${libdir:=$exec_prefix/lib}"
+: "${includedir:=$prefix/include}"
+: "${datadir:=$prefix/share}"
+: "${mandir:=$datadir/man}"
+
+# ------------------------------------------------------------------
+# Deteccion del anfitrion
+# ------------------------------------------------------------------
+
+guess_host() {
+    if [ -x "$srcdir/config/config.guess" ]; then
+        "$srcdir/config/config.guess"
+        return
+    fi
+    uname -s >/dev/null 2>&1 || true
+    os=$(uname -s 2>/dev/null || echo unknown)
+    arch=$(uname -m 2>/dev/null || echo unknown)
+    case "$os" in
+    Linux) os=linux ;;
+    Darwin) os=darwin ;;
+    FreeBSD) os=freebsd ;;
+    NetBSD) os=netbsd ;;
+    OpenBSD) os=openbsd ;;
+    CYGWIN* | MINGW* | MSYS*) os=windows ;;
+    *) os=unknown ;;
+    esac
+    case "$arch" in
+    x86_64 | amd64) arch=x86_64 ;;
+    i?86) arch=i386 ;;
+    aarch64 | arm64) arch=aarch64 ;;
+    arm*) arch=arm ;;
+    riscv64) arch=riscv64 ;;
+    *) arch=unknown ;;
+    esac
+    echo "$arch-pc-$os"
+}
+
+: "${host:=$(guess_host)}"
+: "${target:=$host}"
+
+# ------------------------------------------------------------------
+# Deteccion del compilador
+# ------------------------------------------------------------------
+
+if [ -z "$CC" ]; then
+    for candidate in cc gcc clang tcc; do
+        if command -v "$candidate" >/dev/null 2>&1; then
+            CC=$candidate
+            break
+        fi
+    done
+fi
+if [ -z "$CC" ]; then
+    echo "configure: no se encuentra un compilador C (prueba con CC=...)" >&2
+    exit 1
+fi
+
+if [ -z "$CFLAGS" ]; then
+    if [ "$enable_debug" = yes ]; then
+        CFLAGS="-O0 -g3"
+    else
+        CFLAGS="-O2"
+    fi
+fi
+
+STD_FLAG="-std=c11"
+WARN="-Wall -Wextra"
+for flag in $CFLAGS; do
+    case "$flag" in
+    -std=*) STD_FLAG="" ;;
+    esac
+done
+
+if [ "$enable_assert" = no ]; then
+    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+fi
+
+AR=${AR:-ar}
+ARFLAGS=${ARFLAGS:-rc}
+RANLIB=${RANLIB:-ranlib}
+INSTALL=${INSTALL:-install}
+INSTALL_PROGRAM="$INSTALL -m 755"
+INSTALL_DATA="$INSTALL -m 644"
+LDFLAGS=${LDFLAGS:-}
+
+printf 'configuring FOC...\n'
+printf '  host:      %s\n' "$host"
+printf '  target:    %s\n' "$target"
+printf '  compiler:  %s\n' "$CC"
+printf '  cflags:    %s %s %s\n' "$STD_FLAG" "$CFLAGS" "$WARN"
+printf '  prefix:    %s\n' "$prefix"
+
+# ------------------------------------------------------------------
+# Generacion del Makefile
+# ------------------------------------------------------------------
+
+if [ ! -f "$srcdir/Makefile.in" ]; then
+    echo "configure: no se encuentra Makefile.in" >&2
+    exit 1
+fi
+
+sed \
+    -e "s|@srcdir@|$srcdir|g" \
+    -e "s|@topdir@|$builddir|g" \
+    -e "s|@CC@|$CC|g" \
+    -e "s|@CFLAGS@|$STD_FLAG $CFLAGS $WARN|g" \
+    -e "s|@CPPFLAGS@|$CPPFLAGS|g" \
+    -e "s|@LDFLAGS@|$LDFLAGS|g" \
+    -e "s|@AR@|$AR|g" \
+    -e "s|@ARFLAGS@|$ARFLAGS|g" \
+    -e "s|@RANLIB@|$RANLIB|g" \
+    -e "s|@INSTALL@|$INSTALL|g" \
+    -e "s|@INSTALL_PROGRAM@|$INSTALL_PROGRAM|g" \
+    -e "s|@INSTALL_DATA@|$INSTALL_DATA|g" \
+    -e "s|@prefix@|$prefix|g" \
+    -e "s|@exec_prefix@|$exec_prefix|g" \
+    -e "s|@bindir@|$bindir|g" \
+    -e "s|@libdir@|$libdir|g" \
+    -e "s|@includedir@|$includedir|g" \
+    -e "s|@datadir@|$datadir|g" \
+    -e "s|@mandir@|$mandir|g" \
+    -e "s|@host_triple@|$host|g" \
+    -e "s|@target_triple@|$target|g" \
+    -e "s|@build_triple@|$host|g" \
+    "$srcdir/Makefile.in" > Makefile
+
+cat > config.status <<EOF
+#!/bin/sh
+# Reconfigura el arbol de fuentes con los mismos parametros.
+exec "$srcdir/configure" --prefix=$prefix --host=$host --target=$target
+EOF
+chmod +x config.status
+
+printf 'configure: listo. Ejecuta "make" para construir.\n'

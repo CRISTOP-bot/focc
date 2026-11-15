@@ -1,0 +1,29 @@
+# Integracion continua de FOC en Forgejo.
+# El formato es el de las Actions de Forgejo (.forgejo/workflows).
+
+name: FOC
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build:
+    name: Construir y probar
+    runs-on: docker
+    container:
+      image: debian:stable
+    steps:
+      - name: Instalar las dependencias
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential
+      - name: Clonar
+        run: |
+          git clone $FORGEJO_REPOSITORY foc
+          cd foc
+      - name: Configurar
+        run: cd foc && ./configure
+      - name: Construir
+        run: cd foc && make -j$(nproc)
+      - name: Pruebas
+        run: cd foc && make check

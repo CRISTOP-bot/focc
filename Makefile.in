@@ -1,0 +1,118 @@
+# FOC — plantilla de Makefile.
+# Generada por ./configure. No editar este fichero; editar Makefile.in.
+
+srcdir = @srcdir@
+topdir = @topdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+AR = @AR@
+ARFLAGS = @ARFLAGS@
+RANLIB = @RANLIB@
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+libdir = @libdir@
+includedir = @includedir@
+datadir = @datadir@
+mandir = @mandir@
+host_triple = @host_triple@
+target_triple = @target_triple@
+build_triple = @build_triple@
+
+include Makefile.def
+
+# Nota: `include/` contiene las cabeceras estandar que FOC ofrece a los
+# programas que compila; no se usan para construir el propio compilador.
+ALL_CFLAGS = $(CPPFLAGS) $(CFLAGS) -I$(srcdir)/foc/include
+
+.PHONY: all all-gcc all-libc all-libgcc all-libcc1 all-tools install clean check test \
+	install-strip installdirs uninstall
+
+all: all-gcc all-libc all-libgcc all-libcc1 all-tools
+
+all-gcc: bin/foc
+
+bin/foc: $(FOC_SOURCES) $(FOC_HEADERS)
+	@mkdir -p bin
+	$(CC) $(ALL_CFLAGS) $(FOC_SOURCES) $(LDFLAGS) -o $@
+
+all-libc: lib/libc.a
+
+lib/libc.a: $(LIBC_SOURCES)
+	@mkdir -p lib
+	$(AR) $(ARFLAGS) $@ $(LIBC_SOURCES)
+	-$(RANLIB) $@
+
+all-libgcc: lib/libgcc.a
+
+lib/libgcc.a: $(LIBGCC_SOURCES)
+	@mkdir -p lib
+	$(AR) $(ARFLAGS) $@ $(LIBGCC_SOURCES)
+	-$(RANLIB) $@
+
+all-libcc1: lib/libcc1.a
+
+lib/libcc1.a: $(LIBCC1_SOURCES)
+	@mkdir -p lib
+	$(AR) $(ARFLAGS) $@ $(LIBCC1_SOURCES)
+	-$(RANLIB) $@
+
+all-tools: bin/focdep bin/foccount
+
+bin/focdep: tools/src/focdep.c $(FOC_SOURCES) $(FOC_HEADERS)
+	@mkdir -p bin
+	$(CC) $(ALL_CFLAGS) tools/src/focdep.c $(FOC_SOURCES) $(LDFLAGS) -o $@
+
+bin/foccount: tools/src/foccount.c $(FOC_SOURCES) $(FOC_HEADERS)
+	@mkdir -p bin
+	$(CC) $(ALL_CFLAGS) tools/src/foccount.c $(FOC_SOURCES) $(LDFLAGS) -o $@
+
+check test: all
+	@mkdir -p build
+	$(CC) $(ALL_CFLAGS) -Itests $(TEST_SOURCES) $(filter-out foc/src/driver/main.c,$(FOC_SOURCES)) $(LDFLAGS) -o build/foc_tests
+	./build/foc_tests
+	$(CC) $(ALL_CFLAGS) libc/src/stdio.c tests/libc/test_stdio.c $(LDFLAGS) -o build/foc_stdio_tests
+	./build/foc_stdio_tests
+	@sh tests/run-integration.sh
+
+install: all installdirs
+	$(INSTALL_PROGRAM) bin/foc $(DESTDIR)$(bindir)/foc
+	$(INSTALL_PROGRAM) bin/focdep $(DESTDIR)$(bindir)/focdep
+	$(INSTALL_PROGRAM) bin/foccount $(DESTDIR)$(bindir)/foccount
+	$(INSTALL_DATA) include/stddef.h $(DESTDIR)$(includedir)/stddef.h
+	$(INSTALL_DATA) include/stdarg.h $(DESTDIR)$(includedir)/stdarg.h
+	$(INSTALL_DATA) include/stdbool.h $(DESTDIR)$(includedir)/stdbool.h
+	$(INSTALL_DATA) include/stdint.h $(DESTDIR)$(includedir)/stdint.h
+	$(INSTALL_DATA) include/float.h $(DESTDIR)$(includedir)/float.h
+	$(INSTALL_DATA) include/limits.h $(DESTDIR)$(includedir)/limits.h
+	$(INSTALL_DATA) lib/libc.a $(DESTDIR)$(libdir)/libc.a
+	$(INSTALL_DATA) lib/libgcc.a $(DESTDIR)$(libdir)/libgcc.a
+
+installdirs:
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) -d $(DESTDIR)$(includedir)
+
+install-strip: install
+	strip $(DESTDIR)$(bindir)/foc || true
+
+uninstall:
+	rm -f $(DESTDIR)$(bindir)/foc
+	rm -f $(DESTDIR)$(bindir)/focdep
+	rm -f $(DESTDIR)$(bindir)/foccount
+	rm -f $(DESTDIR)$(includedir)/stddef.h
+	rm -f $(DESTDIR)$(includedir)/stdarg.h
+	rm -f $(DESTDIR)$(includedir)/stdbool.h
+	rm -f $(DESTDIR)$(includedir)/stdint.h
+	rm -f $(DESTDIR)$(includedir)/float.h
+	rm -f $(DESTDIR)$(includedir)/limits.h
+
+clean:
+	rm -rf bin lib build
