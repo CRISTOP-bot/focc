@@ -24,11 +24,12 @@ if (-not $CC) {
     }
 }
 if (-not $CC) {
-    Write-Error "No se encontró GCC o Clang. Instala MinGW-w64/LLVM o define -CC <ruta al compilador>."
+    Write-Error "No se encontro GCC o Clang. Instala MinGW-w64/LLVM o define -CC <ruta al compilador>."
     exit 1
 }
 
 $srcs = Get-ChildItem -Recurse -Path "foc\src" -Filter *.c | Sort-Object FullName | ForEach-Object { $_.FullName }
+$srcs += ([System.IO.Path]::GetFullPath((Join-Path $root "libcc1\src\passes.c")))
 if ($srcs.Count -eq 0) { Write-Error "No hay fuentes en foc\src/"; exit 1 }
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Out) | Out-Null

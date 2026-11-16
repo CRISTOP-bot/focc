@@ -1,5 +1,5 @@
 #!/bin/sh
-# FOC — configuracion del arbol de fuentes.
+# FOC - configuracion del arbol de fuentes.
 #
 # Script propio (no generado por autoconf) que detecta el anfitrion, el
 # compilador y las opciones de instalacion, y genera `Makefile` a partir de
@@ -17,8 +17,15 @@
 
 set -e
 
-srcdir=$(cd "$(dirname "$0")" && pwd)
-builddir=$(pwd)
+# En entornos tipo MSYS/MinGW las rutas se normalizan a estilo Windows
+# (pwd -W) para que las entienda el compilador nativo.
+if pwd -W >/dev/null 2>&1; then
+    srcdir=$(cd "$(dirname "$0")" && pwd -W)
+    builddir=$(pwd -W)
+else
+    srcdir=$(cd "$(dirname "$0")" && pwd)
+    builddir=$(pwd)
+fi
 
 prefix=/usr/local
 exec_prefix=""

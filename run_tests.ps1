@@ -3,7 +3,7 @@ param(
     [string]$CC = ""
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
@@ -27,6 +27,7 @@ $mainSource = [System.IO.Path]::GetFullPath((Join-Path $root "foc\src\driver\mai
 $implementationSources = @(Get-ChildItem -Recurse -Path "foc\src" -Filter *.c |
     Where-Object { $_.FullName -ne $mainSource } |
     Sort-Object FullName | ForEach-Object { $_.FullName })
+$implementationSources += ([System.IO.Path]::GetFullPath((Join-Path $root "libcc1\src\passes.c")))
 if ($testSources.Count -eq 0 -or $implementationSources.Count -eq 0) {
     Write-Error "No se encontraron fuentes de pruebas o del compilador."
     exit 1

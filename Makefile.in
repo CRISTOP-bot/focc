@@ -1,4 +1,4 @@
-# FOC — plantilla de Makefile.
+# FOC - plantilla de Makefile.
 # Generada por ./configure. No editar este fichero; editar Makefile.in.
 
 srcdir = @srcdir@
@@ -68,11 +68,11 @@ all-tools: bin/focdep bin/foccount
 
 bin/focdep: tools/src/focdep.c $(FOC_SOURCES) $(FOC_HEADERS)
 	@mkdir -p bin
-	$(CC) $(ALL_CFLAGS) tools/src/focdep.c $(FOC_SOURCES) $(LDFLAGS) -o $@
+	$(CC) $(ALL_CFLAGS) tools/src/focdep.c $(filter-out foc/src/driver/main.c,$(FOC_SOURCES)) $(LDFLAGS) -o $@
 
 bin/foccount: tools/src/foccount.c $(FOC_SOURCES) $(FOC_HEADERS)
 	@mkdir -p bin
-	$(CC) $(ALL_CFLAGS) tools/src/foccount.c $(FOC_SOURCES) $(LDFLAGS) -o $@
+	$(CC) $(ALL_CFLAGS) tools/src/foccount.c $(filter-out foc/src/driver/main.c,$(FOC_SOURCES)) $(LDFLAGS) -o $@
 
 check test: all
 	@mkdir -p build

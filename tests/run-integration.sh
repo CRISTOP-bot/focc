@@ -32,6 +32,15 @@ for source in tests/integration/*.c tests/integration/*.s tests/integration/*.S 
         expected=$(cat "$expected_file")
     fi
 
+    case "$source" in
+        *.m4)
+            if ! command -v m4 >/dev/null 2>&1; then
+                echo "OMITIDO $name: GNU M4 no disponible"
+                continue
+            fi
+            ;;
+    esac
+
     program="$outdir/$name"
     if ! "$FOC" "$source" -o "$program" > "$outdir/$name.log" 2>&1; then
         echo "FALLO  $name: la compilacion termino con error"
