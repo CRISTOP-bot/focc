@@ -1303,8 +1303,20 @@ static FOCLowered lower_expr(FOCSema *sema, FOCExpr *expr) {
             type = resolve_declarator_type(sema, expr->sizeof_expr.type_name->spec,
                                            expr->sizeof_expr.type_name->declarator);
         } else {
-            FOCLowered operand = lower_expr(sema, expr->sizeof_expr.expr);
-            type = operand.type;
+            /* sizeof no aplica el decaimiento array->puntero: el operando
+             * conserva su tipo natural (un array se mide como array). */
+            FOCExpr *operand_expr = expr->sizeof_expr.expr;
+            if (operand_expr->kind == FOC_EXPR_IDENT) {
+                FOCSymbol *symbol = scope_lookup(sema, operand_expr->ident.name,
+                                                 operand_expr->ident.name_len);
+                if (symbol) {
+                    type = symbol->type;
+                }
+            }
+            if (!type) {
+                FOCLowered operand = lower_expr(sema, expr->sizeof_expr.expr);
+                type = operand.type;
+            }
         }
         out.type = FOC_type_basic(FOC_TYPE_ULONG);
         out.value = ir_const(FOC_IR_I64, type ? type->size : 0);
