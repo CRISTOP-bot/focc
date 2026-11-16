@@ -926,6 +926,90 @@ static FOCExpr *parse_char_literal(FOCParser *p, FOCToken *tok) {
     return expr;
 }
 
+/* Decodifica las secuencias de escape de C dentro de un literal. */
+static char *decode_escapes(const char *src, size_t len, size_t *out_len) {
+    char *out = (char *)malloc(len + 1);
+    if (!out) {
+        return NULL;
+    }
+    size_t oi = 0;
+    for (size_t i = 0; i < len;) {
+        char c = src[i];
+        if (c != '\\') {
+            out[oi++] = c;
+            i++;
+            continue;
+        }
+        i++;
+        if (i >= len) {
+            break;
+        }
+        char esc = src[i];
+        switch (esc) {
+        case 'n': out[oi++] = '\n'; i++; break;
+        case 't': out[oi++] = '\t'; i++; break;
+        case 'r': out[oi++] = '\r'; i++; break;
+        case '0': out[oi++] = '\0'; i++; break;
+        case 'a': out[oi++] = '\a'; i++; break;
+        case 'b': out[oi++] = '\b'; i++; break;
+        case 'f': out[oi++] = '\f'; i++; break;
+        case 'v': out[oi++] = '\v'; i++; break;
+        case '\\': out[oi++] = '\\'; i++; break;
+        case '"': out[oi++] = '"'; i++; break;
+        case '\'': out[oi++] = '\''; i++; break;
+        case 'x': {
+            size_t j = i + 1;
+            size_t start = j;
+            unsigned value = 0;
+            while (j < len) {
+                char h = src[j];
+                int digit;
+                if (h >= '0' && h <= '9') {
+                    digit = h - '0';
+                } else if (h >= 'a' && h <= 'f') {
+                    digit = h - 'a' + 10;
+                } else if (h >= 'A' && h <= 'F') {
+                    digit = h - 'A' + 10;
+                } else {
+                    break;
+                }
+                value = value * 16 + (unsigned)digit;
+                j++;
+            }
+            if (j == start) {
+                out[oi++] = 'x';
+                i++;
+            } else {
+                out[oi++] = (char)value;
+                i = j;
+            }
+            break;
+        }
+        default:
+            if (esc >= '0' && esc <= '7') {
+                size_t j = i;
+                size_t count = 0;
+                unsigned value = 0;
+                while (j < len && count < 3 && src[j] >= '0' && src[j] <= '7') {
+                    value = value * 8 + (unsigned)(src[j] - '0');
+                    j++;
+                    count++;
+                }
+                out[oi++] = (char)value;
+                i = j;
+            } else {
+                /* Secuencia desconocida: se conserva el caracter tal cual. */
+                out[oi++] = esc;
+                i++;
+            }
+            break;
+        }
+    }
+    out[oi] = '\0';
+    *out_len = oi;
+    return out;
+}
+
 static FOCExpr *parse_string_literal(FOCParser *p, FOCToken *tok) {
     FOCExpr *expr = FOC_ast_expr(FOC_EXPR_STRING, span_of(p, tok));
     expr->string_lit.text = tok->text;
@@ -941,8 +1025,16 @@ static FOCExpr *parse_string_literal(FOCParser *p, FOCToken *tok) {
     while (close < len && start[close] != '"') {
         close++;
     }
-    expr->string_lit.value = start + open + 1;
-    expr->string_lit.value_len = close > open + 1 ? close - open - 1 : 0;
+    size_t value_len = close > open + 1 ? close - open - 1 : 0;
+    expr->string_lit.value_len = 0;
+    {
+        size_t decoded_len = 0;
+        char *decoded = decode_escapes(start + open + 1, value_len, &decoded_len);
+        if (decoded) {
+            expr->string_lit.value = decoded;
+            expr->string_lit.value_len = decoded_len;
+        }
+    }
 
     /* Concatena literales adyacentes. */
     while (cur(p) && cur(p)->kind == FOC_TOK_STRING) {
@@ -958,13 +1050,19 @@ static FOCExpr *parse_string_literal(FOCParser *p, FOCToken *tok) {
         while (nclose < nlen && nstart[nclose] != '"') {
             nclose++;
         }
-        size_t extra = nclose > nopen + 1 ? nclose - nopen - 1 : 0;
+        size_t next_value_len = nclose > nopen + 1 ? nclose - nopen - 1 : 0;
+        size_t decoded_len = 0;
+        char *decoded = decode_escapes(nstart + nopen + 1, next_value_len, &decoded_len);
+        if (!decoded) {
+            return expr;
+        }
+        size_t extra = decoded_len;
         char *merged = (char *)malloc(expr->string_lit.value_len + extra + 1);
         if (!merged) {
             return expr;
         }
         memcpy(merged, expr->string_lit.value, expr->string_lit.value_len);
-        memcpy(merged + expr->string_lit.value_len, nstart + nopen + 1, extra);
+        memcpy(merged + expr->string_lit.value_len, decoded, extra);
         merged[expr->string_lit.value_len + extra] = '\0';
         expr->string_lit.value = merged;
         expr->string_lit.value_len += extra;

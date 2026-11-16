@@ -113,4 +113,21 @@ void test_parser(void) {
     CHECK_INT(unit->decls[0]->declarator->ctors[0].kind, FOC_CTOR_FUNCTION);
     CHECK_INT(unit->decls[0]->declarator->ctors[1].kind, FOC_CTOR_POINTER);
     CHECK_INT(unit->decls[0]->declarator->ctors[2].kind, FOC_CTOR_ARRAY);
+
+    /* Literales de cadena: las secuencias de escape se decodifican. */
+    unit = parse_text("int f(void) { return \"a\\nB\\t\\\\\"; }", &errors);
+    CHECK_INT(errors, 0);
+    CHECK(unit->decls[0]->body->block.count == 1);
+    {
+        FOCStmt *ret = unit->decls[0]->body->block.items[0];
+        CHECK(ret->return_stmt.value != NULL);
+        CHECK(ret->return_stmt.value->kind == FOC_EXPR_STRING);
+        if (ret->return_stmt.value && ret->return_stmt.value->kind == FOC_EXPR_STRING) {
+            /* "a\nB\t\\" decodifica a: a, LF, B, TAB, backslash */
+            CHECK_INT(ret->return_stmt.value->string_lit.value_len, 5);
+            CHECK_INT(ret->return_stmt.value->string_lit.value[1], '\n');
+            CHECK_INT(ret->return_stmt.value->string_lit.value[3], '\t');
+            CHECK_INT(ret->return_stmt.value->string_lit.value[4], '\\');
+        }
+    }
 }
