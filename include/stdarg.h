@@ -1,4 +1,4 @@
-/* stdarg.h —argumentos variables de FOC. */
+/* stdarg.h -argumentos variables de FOC. */
 #ifndef _FOC_STDARG_H
 #define _FOC_STDARG_H
 

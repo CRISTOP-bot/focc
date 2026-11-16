@@ -1,4 +1,4 @@
-/* stdint.h —tipos enteros de tamano fijo de FOC. */
+/* stdint.h -tipos enteros de tamano fijo de FOC. */
 #ifndef _FOC_STDINT_H
 #define _FOC_STDINT_H
 

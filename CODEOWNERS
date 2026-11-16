@@ -1,5 +1,5 @@
-# FOCC — responsables por defecto para revisión en GitHub.
-# GitHub asigna los revisores de este archivo automáticamente a los PRs.
+# FOCC - responsables por defecto para revision en GitHub.
+# GitHub asigna los revisores de este archivo automaticamente a los PRs.
 # Formato: ruta  @usuario
 
 *                        @CRISTOP-bot

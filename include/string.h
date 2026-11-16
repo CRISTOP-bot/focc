@@ -1,4 +1,4 @@
-/* string.h —cadenas estandar de FOC. */
+/* string.h -cadenas estandar de FOC. */
 #ifndef _FOC_STRING_H
 #define _FOC_STRING_H
 

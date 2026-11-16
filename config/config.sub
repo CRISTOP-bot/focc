@@ -1,5 +1,5 @@
 #!/bin/sh
-# FOC — config.sub: normaliza un triple de destino.
+# FOC - config.sub: normaliza un triple de destino.
 #
 # Version propia y simplificada: valida la forma <arch>-<vendor>-<os>-<env>
 # y devuelve el triple normalizado.

@@ -19,7 +19,7 @@ FOCSourceFile *FOC_source_add(FOCSourceMgr *mgr, const char *path, const char *d
     }
     file->data[len] = '\0';
 
-    /* Índice de líneas. */
+    /* Indice de lineas. */
     size_t count = 1;
     for (size_t i = 0; i < len; i++) {
         if (data[i] == '\n') {
@@ -116,7 +116,7 @@ size_t FOC_source_column_of(const FOCSourceFile *file, uint32_t offset) {
     }
     size_t col = 1;
     for (uint32_t i = start; i < offset; i++) {
-        /* Cuenta UTF-8: los bytes de continuación noUME. */
+        /* Cuenta UTF-8: los bytes de continuacion noUME. */
         if (((unsigned char)file->data[i] & 0xC0) != 0x80) {
             col++;
         }

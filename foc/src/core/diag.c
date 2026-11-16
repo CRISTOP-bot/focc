@@ -239,7 +239,7 @@ void FOC_diag_report(FOCDiagEngine *engine, FOCDiagnostic diag) {
     fprintf(out, "%s%*s |%s\n", cyan, (int)pad, "", reset);
     fprintf(out, "%s%s | %.*s\n", cyan, number, (int)text_len, text);
 
-    /* Marcador de posición. */
+    /* Marcador de posicion. */
     uint32_t start = file->line_starts[line_index];
     size_t offset = diag.span.start > start ? diag.span.start - start : 0;
     size_t end = diag.span.end > start ? diag.span.end - start : offset;

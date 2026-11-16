@@ -1,11 +1,11 @@
-# Estándares de código
+# Estandares de codigo
 
-- Go idiomático: `gofmt`, `go vet`, nombres en minúsculas para paquetes.
-- Paquetes pequeños con una responsabilidad clara.
+- Go idiomatico: `gofmt`, `go vet`, nombres en minusculas para paquetes.
+- Paquetes pequenos con una responsabilidad clara.
 - Errores envueltos con contexto (`fmt.Errorf("...: %w", err)`).
-- Diagnósticos con `Span`, nunca imprimir directamente desde el frontend.
-- Sin dependencias externas salvo decisión documentada.
-- Cada corrección de error incluye una prueba de regresión.
+- Diagnosticos con `Span`, nunca imprimir directamente desde el frontend.
+- Sin dependencias externas salvo decision documentada.
+- Cada correccion de error incluye una prueba de regresion.
 - Los tests confirman el comportamiento, no solo que compila.
-- Comentarios en español para decisiones de diseño; nombres de código en
-  inglés cuando correspondan a conceptos del estándar de C/C++.
+- Comentarios en espanol para decisiones de diseno; nombres de codigo en
+  ingles cuando correspondan a conceptos del estandar de C/C++.

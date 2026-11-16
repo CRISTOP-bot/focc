@@ -45,7 +45,7 @@ void *FOC_arena_alloc(FOCArena *arena, size_t size) {
     if (size == 0) {
         size = 1;
     }
-    size = (size + 15u) & ~(size_t)15u; /* alineación a 16 bytes */
+    size = (size + 15u) & ~(size_t)15u; /* alineacion a 16 bytes */
     FOCArenaBlock *block = arena->head;
     if (!block || block->used + size > block->size) {
         return arena_raw_alloc(arena, size);
@@ -57,7 +57,7 @@ void *FOC_arena_alloc(FOCArena *arena, size_t size) {
 
 void *FOC_arena_calloc(FOCArena *arena, size_t count, size_t size) {
     if (count != 0 && size > (size_t)-1 / count) {
-        fprintf(stderr, "FOC: desbordamiento de tamaño en la reserva\n");
+        fprintf(stderr, "FOC: desbordamiento de tamano en la reserva\n");
         abort();
     }
     size_t total = count * size;

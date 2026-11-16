@@ -16,7 +16,7 @@ typedef struct FOCParam FOCParam;
 typedef struct FOCTypeName FOCTypeName;
 
 /* ------------------------------------------------------------------ */
-/* Especificadores de declaración                                       */
+/* Especificadores de declaracion                                       */
 /* ------------------------------------------------------------------ */
 
 struct FOCDeclSpec {
@@ -32,7 +32,7 @@ struct FOCDeclSpec {
     bool is_restrict;
     bool is_inline;
     bool is_noreturn;
-    /* Tipo básico (combinación de palabras clave). */
+    /* Tipo basico (combinacion de palabras clave). */
     bool t_void;
     bool t_bool;
     bool t_char;
@@ -58,9 +58,9 @@ struct FOCDeclSpec {
 /* ------------------------------------------------------------------ */
 
 /* Un declarador se modela como una lista de constructores de tipo en
- * orden de aplicación (del más lejano al más cercano al identificador).
- * Así `int *a[3]` -> [PUNTER, ARRAY(3)] y `int (*a)[3]` -> [ARRAY(3), PUNTER],
- * que reproduce exactamente la semántica de C sin ambigüedades. */
+ * orden de aplicacion (del mas lejano al mas cercano al identificador).
+ * Asi `int *a[3]` -> [PUNTER, ARRAY(3)] y `int (*a)[3]` -> [ARRAY(3), PUNTER],
+ * que reproduce exactamente la semantica de C sin ambiguedades. */
 typedef enum {
     FOC_CTOR_POINTER = 0,
     FOC_CTOR_ARRAY,
@@ -79,11 +79,11 @@ typedef struct {
     bool array_const;
     bool array_volatile;
     bool array_restrict;
-    /* Función. */
+    /* Funcion. */
     FOCParam **params;
     size_t param_count;
     bool variadic;
-    bool has_proto; /* la lista de parámetros es explícita */
+    bool has_proto; /* la lista de parametros es explicita */
 } FOCDeclCtor;
 
 struct FOCDeclarator {
@@ -156,8 +156,8 @@ struct FOCDecl {
     FOCDeclSpec *spec;
     FOCDeclarator *declarator;
     FOCExpr *init;
-    FOCStmt *body; /* cuerpo de la definición de función */
-    FOCDecl *next; /* resto de declaradores de la misma declaración */
+    FOCStmt *body; /* cuerpo de la definicion de funcion */
+    FOCDecl *next; /* resto de declaradores de la misma declaracion */
 };
 
 /* ------------------------------------------------------------------ */
@@ -188,7 +188,7 @@ typedef enum {
 struct FOCExpr {
     FOCExprKind kind;
     FOCSpan span;
-    FOCType *type; /* lo rellena el análisis semántico */
+    FOCType *type; /* lo rellena el analisis semantico */
     union {
         struct {
             const char *text;
@@ -362,7 +362,7 @@ struct FOCStmt {
 };
 
 /* ------------------------------------------------------------------ */
-/* Unidad de traducción                                                */
+/* Unidad de traduccion                                                */
 /* ------------------------------------------------------------------ */
 
 typedef struct {
@@ -378,7 +378,7 @@ FOCDeclSpec *FOC_ast_decl_spec(FOCSpan span);
 FOCTypeName *FOC_ast_type_name(FOCSpan span);
 FOCUnit *FOC_ast_unit(void);
 
-/* Asigna el tipo a una expresión (usado por el análisis semántico). */
+/* Asigna el tipo a una expresion (usado por el analisis semantico). */
 void FOC_ast_set_type(FOCExpr *expr, FOCType *type);
 
 #endif /* FOC_AST_H */

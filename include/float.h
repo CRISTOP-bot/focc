@@ -1,4 +1,4 @@
-/* float.h —parametros de coma flotante de FOC. */
+/* float.h -parametros de coma flotante de FOC. */
 #ifndef _FOC_FLOAT_H
 #define _FOC_FLOAT_H
 

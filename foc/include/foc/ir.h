@@ -103,7 +103,7 @@ typedef struct {
     const char *init_symbol; /* relocacion del valor inicial a una cadena */
 } FOCIRGlobal;
 
-/* Las instrucciones se guardan en bloques de tamaño fijo: de este modo los
+/* Las instrucciones se guardan en bloques de tamano fijo: de este modo los
  * punteros a instrucciones siguen siendo validos aunque la IR crezca, lo que
  * permite al generador mantener referencias mientras genera otras. */
 #define FOC_IR_BLOCK_SIZE 64

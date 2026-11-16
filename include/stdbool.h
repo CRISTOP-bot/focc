@@ -1,4 +1,4 @@
-/* stdbool.h —tipos booleanos de FOC. */
+/* stdbool.h -tipos booleanos de FOC. */
 #ifndef _FOC_STDBOOL_H
 #define _FOC_STDBOOL_H
 

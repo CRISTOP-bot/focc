@@ -1,5 +1,5 @@
 #!/bin/sh
-# FOC — config.guess: adivina el triple del anfitrion.
+# FOC - config.guess: adivina el triple del anfitrion.
 #
 # Version propia y simplificada: devuelve <arquitectura>-<vendor>-<sistema>.
 # Usa uname cuando esta disponible y permite forzar el valor con FOC_HOST.

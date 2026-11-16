@@ -628,7 +628,7 @@ static FOCLowered lower_call(FOCSema *sema, FOCExpr *expr) {
             callee_name = FOC_strndup(symbol->name, symbol->name_len);
             func_type = symbol->type;
         } else {
-            sema_error(sema, callee->span, "E0405", "función desconocida: '%.*s'",
+            sema_error(sema, callee->span, "E0405", "funcion desconocida: '%.*s'",
                        (int)callee->ident.name_len, callee->ident.name);
         }
     }
@@ -637,7 +637,7 @@ static FOCLowered lower_call(FOCSema *sema, FOCExpr *expr) {
     size_t count = expr->call.arg_count;
     if (param_count && count < param_count) {
         sema_error(sema, expr->span, "E0406",
-                   "la función espera %zu argumentos pero se han dado %zu", param_count, count);
+                   "la funcion espera %zu argumentos pero se han dado %zu", param_count, count);
     }
 
     /* Los argumentos se evaluan antes de emitir la llamada. */
@@ -901,7 +901,7 @@ static FOCLowered lower_assign(FOCSema *sema, FOCExpr *expr) {
     FOCLowered lhs = lower_expr(sema, expr->assign.lhs);
     if (!lhs.is_lvalue) {
         sema_error(sema, expr->assign.lhs->span, "E0408",
-                   "no se puede asignar a una expresión que no es un lvalor");
+                   "no se puede asignar a una expresion que no es un lvalor");
         return out;
     }
     FOCLowered rhs = lower_expr(sema, expr->assign.rhs);
@@ -1391,7 +1391,7 @@ static void lower_local_decl_one(FOCSema *sema, FOCDecl *decl) {
 }
 
 static void lower_local_decl(FOCSema *sema, FOCDecl *decl) {
-    /* Una declaración con varios declaradores es una cadena de FOCDecl. */
+    /* Una declaracion con varios declaradores es una cadena de FOCDecl. */
     for (FOCDecl *d = decl; d; d = d->next) {
         lower_local_decl_one(sema, d);
     }
@@ -1872,7 +1872,7 @@ FOCIRModule *FOC_irgen(FOCUnit *unit, FOCDiagEngine *diag, FOCSourceMgr *sources
     scope_push(&sema);
 
     for (size_t i = 0; i < unit->count; i++) {
-        /* Una declaración con varios declaradores es una cadena de FOCDecl. */
+        /* Una declaracion con varios declaradores es una cadena de FOCDecl. */
         for (FOCDecl *d = unit->decls[i]; d; d = d->next) {
             if (d->kind == FOC_DCL_FUNCTION) {
                 lower_function(&sema, d);

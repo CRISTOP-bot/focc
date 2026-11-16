@@ -135,7 +135,7 @@ static bool source_has_next(FOCPreproc *pp) {
 
 /* Consume los EOF de ficheros incluidos que queden al tope de la pila.
  * El lexer inserta un FOC_TOK_EOF al final de cada fichero; en el flujo de
- * preprocesado ese EOF solo termina el fichero actual, no la traducción. */
+ * preprocesado ese EOF solo termina el fichero actual, no la traduccion. */
 static void pop_included_file_eof(FOCPreproc *pp) {
     for (;;) {
         FOCTokenSource *src = pp->source;
@@ -855,7 +855,7 @@ static void handle_define(FOCPreproc *pp) {
     macro->name = name->text;
     macro->name_len = name->len;
 
-    /* ¿Macro de función? */
+    /* ?Macro de funcion? */
     FOCToken *after = peek_token(pp);
     if (after && after->kind == FOC_TOK_PUNCT && tok_is(after, "(") && !after->space_before) {
         macro->is_function = true;

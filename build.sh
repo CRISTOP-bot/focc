@@ -11,7 +11,7 @@ CFLAGS="${CFLAGS:--std=c11 -O2 -Wall -Wextra -Wpedantic -Ifoc/include}"
 out="${1:-bin/foc}"
 
 if ! command -v "$CC" >/dev/null 2>&1; then
-    echo "error: no se encontró el compilador C '$CC'. Define CC=..." >&2
+    echo "error: no se encontro el compilador C '$CC'. Define CC=..." >&2
     exit 1
 fi
 

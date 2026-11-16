@@ -1,4 +1,4 @@
-# FOC — configuracion de Git.
+# FOC - configuracion de Git.
 
 # Directorio de trabajo local (scratch del desarrollador)
 /build/
@@ -27,7 +27,7 @@
 *.so
 *.dylib
 
-# Fuentes de ensamblador de las pruebas de integración (no son artefactos).
+# Fuentes de ensamblador de las pruebas de integracion (no son artefactos).
 !/tests/integration/assembly.s
 !/tests/integration/assembly_cpp.S
 

@@ -1,4 +1,4 @@
-/* stdio.h —entrada/salida estandar de FOC. */
+/* stdio.h -entrada/salida estandar de FOC. */
 #ifndef _FOC_STDIO_H
 #define _FOC_STDIO_H
 

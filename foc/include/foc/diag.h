@@ -1,4 +1,4 @@
-/* Diagnósticos del compilador. */
+/* Diagnosticos del compilador. */
 #ifndef FOC_DIAG_H
 #define FOC_DIAG_H
 
@@ -31,7 +31,7 @@ typedef enum { FOC_COLOR_AUTO = 0, FOC_COLOR_ALWAYS, FOC_COLOR_NEVER } FOCColorM
 typedef struct {
     FOCSourceMgr *sources;
     FOCArena *arena;
-    FILE *out; /* destino de los diagnósticos (stderr) */
+    FILE *out; /* destino de los diagnosticos (stderr) */
     FOCColorMode color;
     bool json;
     bool warnings_as_errors;

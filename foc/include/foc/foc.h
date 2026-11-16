@@ -1,6 +1,6 @@
 /* FOC - compilador de C y C++.
  *
- * Utilidades comunes: arena de memoria, vectores dinámicos y buffers.
+ * Utilidades comunes: arena de memoria, vectores dinamicos y buffers.
  */
 #ifndef FOC_H
 #define FOC_H
@@ -32,7 +32,7 @@ char *FOC_arena_printf(FOCArena *arena, const char *fmt, ...);
 void FOC_arena_free(FOCArena *arena);
 
 /* ------------------------------------------------------------------ */
-/* Vector dinámico                                                      */
+/* Vector dinamico                                                      */
 /* ------------------------------------------------------------------ */
 
 typedef struct {
@@ -43,7 +43,7 @@ typedef struct {
 } FOCVec;
 
 void FOC_vec_init(FOCVec *v, size_t elem_size);
-/* Añade un elemento cero y devuelve un puntero al hueco reservado. */
+/* Anade un elemento cero y devuelve un puntero al hueco reservado. */
 void *FOC_vec_push(FOCVec *v);
 void FOC_vec_clear(FOCVec *v);
 void FOC_vec_free(FOCVec *v);
@@ -66,7 +66,7 @@ void FOC_buf_append(FOCBuf *b, const char *s, size_t n);
 void FOC_buf_puts(FOCBuf *b, const char *s);
 void FOC_buf_putc(FOCBuf *b, char c);
 void FOC_buf_printf(FOCBuf *b, const char *fmt, ...);
-char *FOC_buf_take(FOCBuf *b); /* transfiere la propiedad; el buffer queda vacío */
+char *FOC_buf_take(FOCBuf *b); /* transfiere la propiedad; el buffer queda vacio */
 void FOC_buf_free(FOCBuf *b);
 
 /* ------------------------------------------------------------------ */

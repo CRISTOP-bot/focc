@@ -90,7 +90,7 @@ void FOC_map_remove(FOCMap *map, const char *key, size_t key_len) {
     while (map->entries[idx].used) {
         FOCMapEntry *entry = &map->entries[idx];
         if (entry->key_len == key_len && memcmp(entry->key, key, key_len) == 0) {
-            /* Rehash el resto de la cadena para no romper las búsquedas. */
+            /* Rehash el resto de la cadena para no romper las busquedas. */
             map->entries[idx].used = false;
             map->entries[idx].key = NULL;
             map->entries[idx].value = NULL;

@@ -1,4 +1,4 @@
-/* Gestión de ficheros fuente y posiciones. */
+/* Gestion de ficheros fuente y posiciones. */
 #ifndef FOC_SOURCE_H
 #define FOC_SOURCE_H
 
@@ -30,9 +30,9 @@ FOCSourceFile *FOC_source_get(FOCSourceMgr *mgr, int id);
 FOCSourceFile *FOC_source_by_path(FOCSourceMgr *mgr, const char *path);
 size_t FOC_source_count(FOCSourceMgr *mgr);
 
-/* Línea (1-based) que contiene el offset. */
+/* Linea (1-based) que contiene el offset. */
 size_t FOC_source_line_of(const FOCSourceFile *file, uint32_t offset);
-/* Texto de una línea sin el salto final. */
+/* Texto de una linea sin el salto final. */
 const char *FOC_source_line_text(const FOCSourceFile *file, size_t line, size_t *out_len);
 /* Columna (1-based, en caracteres UTF-8) del offset. */
 size_t FOC_source_column_of(const FOCSourceFile *file, uint32_t offset);

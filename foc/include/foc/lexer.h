@@ -26,7 +26,7 @@ typedef struct {
     int file_id;
     bool at_line_start;
     bool space_before;
-    bool expanded; /* producido por expansión de macro */
+    bool expanded; /* producido por expansion de macro */
 } FOCToken;
 
 typedef struct {
@@ -42,14 +42,14 @@ void FOC_token_list_free(FOCTokenList *list);
 /* Tokeniza un fichero completo. */
 void FOC_lex_file(const FOCSourceFile *file, FOCDiagEngine *diag, FOCTokenList *out);
 
-/* ¿El token es el texto dado? */
+/* ?El token es el texto dado? */
 bool FOC_tok_is(const FOCToken *tok, const char *text);
-/* ¿El token es la palabra clave dada? */
+/* ?El token es la palabra clave dada? */
 bool FOC_tok_is_kw(const FOCToken *tok, const char *kw);
 /* Copia el texto del token como cadena terminada en NUL (malloc). */
 char *FOC_tok_text_dup(const FOCToken *tok);
 
-/* Palabras clave de C99 (base de las demás versiones). */
+/* Palabras clave de C99 (base de las demas versiones). */
 bool FOC_is_keyword(const char *text, size_t len);
 
 #endif /* FOC_LEXER_H */

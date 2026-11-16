@@ -1,4 +1,4 @@
-/* stddef.h —cabecera estandar de FOC (freestanding). */
+/* stddef.h -cabecera estandar de FOC (freestanding). */
 #ifndef _FOC_STDDEF_H
 #define _FOC_STDDEF_H
 

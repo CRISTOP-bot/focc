@@ -1,4 +1,4 @@
-/* stdlib.h —utilidades estandar de FOC. */
+/* stdlib.h -utilidades estandar de FOC. */
 #ifndef _FOC_STDLIB_H
 #define _FOC_STDLIB_H
 

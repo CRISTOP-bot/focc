@@ -1,4 +1,4 @@
-# FOCC (FOC) — instrucciones para agentes automaticos.
+# FOCC (FOC) - instrucciones para agentes automaticos.
 
 FOCC, abreviado FOC (Fucking Optimized C Compiler), es un compilador propio de
 C escrito en C11 portable. **No** usa GCC, Clang ni LLVM como frontend o
@@ -44,23 +44,23 @@ make check                 # pruebas
 Este repositorio es grande y el contexto es el recurso escaso. Antes de
 cualquier tarea, carga la habilidad correspondiente de `.skills/`:
 
-| Habilidad | Cuándo |
+| Habilidad | Cuando |
 |---|---|
 | `.skills/token-discipline/SKILL.md` | Siempre (reglas de alcance y de consumo de tokens) |
 | `.skills/foc-frontend/SKILL.md` | Al tocar `src/frontend` o `src/ir` |
 | `.skills/foc-backend/SKILL.md` | Al tocar `src/backend` o el runtime |
-| `.skills/foc-testing/SKILL.md` | Al añadir o depurar pruebas |
+| `.skills/foc-testing/SKILL.md` | Al anadir o depurar pruebas |
 
 Resumen de las reglas:
 
 - Localiza con `grep`/`glob` y lee solo el rango necesario; no vuelques
   ficheros completos ni generes JSON como formato de trabajo.
-- Un cambio que toca más de unos pocos ficheros suele ser otro encargo:
+- Un cambio que toca mas de unos pocos ficheros suele ser otro encargo:
   pregunta antes.
-- No crees andamiaje "por si acaso" (stubs, TODOs, ejemplos vacíos) ni
-  añadas dependencias u opciones no solicitadas.
-- No reformatees código ajeno al cambio.
-- Informa de forma breve: qué cambiaste, por qué y con qué comando se
+- No crees andamiaje "por si acaso" (stubs, TODOs, ejemplos vacios) ni
+  anadas dependencias u opciones no solicitadas.
+- No reformatees codigo ajeno al cambio.
+- Informa de forma breve: que cambiaste, por que y con que comando se
   verifica.
 
 ## Documentacion

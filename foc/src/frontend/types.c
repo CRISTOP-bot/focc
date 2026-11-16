@@ -42,7 +42,7 @@ FOCType *FOC_type_basic(FOCTypeKind kind) {
 FOCType *FOC_type_pointer(FOCType *elem) {
     FOCType *type = FOC_type_new(FOC_TYPE_POINTER);
     type->elem = elem;
-    type->size = 8; /* se ajusta según el tamaño de puntero del target */
+    type->size = 8; /* se ajusta segun el tamano de puntero del target */
     type->align = 8;
     return type;
 }
@@ -197,7 +197,7 @@ typedef struct {
 } FOCTypePair;
 
 bool FOC_type_equal(const FOCType *a, const FOCType *b) {
-    /* Pila explícita para evitar recursión infinita en tipos recursivos. */
+    /* Pila explicita para evitar recursion infinita en tipos recursivos. */
     FOCTypePair stack[64];
     size_t sp = 0;
     stack[sp++] = (FOCTypePair){a, b};

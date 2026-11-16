@@ -31,7 +31,7 @@ jobs:
         run: sh ./configure --enable-debug
       - name: Construir
         run: make -j2
-      - name: Ejecutar pruebas unitarias, libc e integración
+      - name: Ejecutar pruebas unitarias, libc e integracion
         run: make check
       - name: Verificar CLI
         run: |
@@ -59,5 +59,5 @@ jobs:
           )
       - name: Construir
         run: ./build.ps1 -CC 'C:\msys64\ucrt64\bin\gcc.exe'
-      - name: Ejecutar pruebas unitarias, libc e integración
+      - name: Ejecutar pruebas unitarias, libc e integracion
         run: ./run_tests.ps1 -CC 'C:\msys64\ucrt64\bin\gcc.exe'

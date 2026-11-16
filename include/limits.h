@@ -1,4 +1,4 @@
-/* limits.h —limites de los tipos basicos de FOC. */
+/* limits.h -limites de los tipos basicos de FOC. */
 #ifndef _FOC_LIMITS_H
 #define _FOC_LIMITS_H
 

@@ -1,53 +1,53 @@
-# Política de seguridad
+# Politica de seguridad
 
 ## Versiones soportadas
 
-FOCC está en **pre-alpha**. No hay versiones estables ni ramas con
-manutención de seguridad: el esfuerzo va a llegar primero a la corrección
-del compilador y después a la estabilidad.
+FOCC esta en **pre-alpha**. No hay versiones estables ni ramas con
+manutencion de seguridad: el esfuerzo va a llegar primero a la correccion
+del compilador y despues a la estabilidad.
 
-| Versión | Soporte                     |
+| Version | Soporte                     |
 | ------- | --------------------------- |
-| main    | última fotografía del desarrollo |
-| demás   | ninguna                     |
+| main    | ultima fotografia del desarrollo |
+| demas   | ninguna                     |
 
-## Cómo reportar una vulnerabilidad
+## Como reportar una vulnerabilidad
 
-Si encuentras un fallo **en FOCC** (no en el código que compilas con
-FOCC), repórtalo con:
+Si encuentras un fallo **en FOCC** (no en el codigo que compilas con
+FOCC), reportalo con:
 
-1. Una descripción del problema y del impacto esperado.
-2. Un caso mínimo reproducible (fichero fuente, línea de órdenes, salida).
-3. La versión o el commit afectado (`foc --version`, `git rev-parse HEAD`).
+1. Una descripcion del problema y del impacto esperado.
+2. Un caso minimo reproducible (fichero fuente, linea de ordenes, salida).
+3. La version o el commit afectado (`foc --version`, `git rev-parse HEAD`).
 
 Canales, en orden de preferencia:
 
 - **GitHub**: usa un reporte privado en
   https://github.com/CRISTOP-bot/focc/security/advisories/new
-- Si no tienes acceso al repositorio, abre un issue público indicando
+- Si no tienes acceso al repositorio, abre un issue publico indicando
   solo que existe una vulnerabilidad y que necesitas un canal privado.
 
-Por favor, no publiques públicamente detalles de una vulnerabilidad sin
+Por favor, no publiques publicamente detalles de una vulnerabilidad sin
 que exista un arreglo o un plan acordado.
 
-## Qué entra en el alcance
+## Que entra en el alcance
 
-- Fallos de memoria, desbordamientos o uso después de liberado dentro
+- Fallos de memoria, desbordamientos o uso despues de liberado dentro
   del compilador (`foc`) o sus herramientas (`focdep`, `foccount`).
-- Bugs que hagan que FOCC acepte código que en realidad no es válido C
+- Bugs que hagan que FOCC acepte codigo que en realidad no es valido C
   y produzca ejecutables con comportamiento malicioso no detectado.
-- Fallos en la generación de código que alteren el comportamiento de
-  programas bien definidos sin diagnóstico.
+- Fallos en la generacion de codigo que alteren el comportamiento de
+  programas bien definidos sin diagnostico.
 
-## Qué queda fuera
+## Que queda fuera
 
-- El código que FOCC compila y sus propias vulnerabilidades (un bug de
-  tu programa compilado con FOCC es tu bug; FOCC no ofrece garantía de
+- El codigo que FOCC compila y sus propias vulnerabilidades (un bug de
+  tu programa compilado con FOCC es tu bug; FOCC no ofrece garantia de
   seguridad del binario resultante).
 - Ausencia de `goto`, `switch` incompleto, falta de ABI System V: son
   limitaciones conocidas y documentadas, no vulnerabilidades.
 
 ## Cadencia de respuesta
 
-Pre-alpha, sin compromiso de SLA: lo habitual es responder en días, no
+Pre-alpha, sin compromiso de SLA: lo habitual es responder en dias, no
 en horas. Los reportes se procesan por orden de entrada y de gravedad.

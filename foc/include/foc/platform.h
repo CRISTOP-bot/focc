@@ -1,4 +1,4 @@
-/* Detección de plataforma y definición de targets. */
+/* Deteccion de plataforma y definicion de targets. */
 #ifndef FOC_PLATFORM_H
 #define FOC_PLATFORM_H
 
@@ -44,7 +44,7 @@ FOCHost FOC_host(void);
 FOCTarget FOC_default_target(void);
 /* Interpreta "x86_64-pc-linux-gnu". Devuelve false si el triple no existe. */
 bool FOC_target_parse(const char *triple, FOCTarget *out);
-/* Representación canónica del triple. */
+/* Representacion canonica del triple. */
 char *FOC_target_triple(const FOCTarget *target);
 int FOC_arch_pointer_size(FOCArch arch);
 bool FOC_arch_is_little_endian(FOCArch arch);

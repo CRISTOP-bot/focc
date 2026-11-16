@@ -1,4 +1,4 @@
-/* Programa de prueba: aritmética y control de flujo. */
+/* Programa de prueba: aritmetica y control de flujo. */
 int suma(int a, int b) { return a + b; }
 
 int factorial(int n) {

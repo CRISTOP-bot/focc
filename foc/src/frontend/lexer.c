@@ -264,7 +264,7 @@ static void lex_char_literal(FOCLexer *lex) {
         }
         lex->pos++;
     }
-    lex_error(lex, start, (uint32_t)lex->pos, "E0102", "literal de carácter sin terminar");
+    lex_error(lex, start, (uint32_t)lex->pos, "E0102", "literal de caracter sin terminar");
     FOC_token_list_push(lex->out, make_token(lex, FOC_TOK_INVALID, start, (uint32_t)lex->pos));
 }
 
@@ -312,7 +312,7 @@ static void lex_punct(FOCLexer *lex) {
         }
     }
     lex->pos++;
-    lex_error(lex, start, (uint32_t)lex->pos, "E0101", "carácter inesperado 0x%02X",
+    lex_error(lex, start, (uint32_t)lex->pos, "E0101", "caracter inesperado 0x%02X",
               (unsigned char)lex->file->data[start]);
     FOC_token_list_push(lex->out, make_token(lex, FOC_TOK_INVALID, start, (uint32_t)lex->pos));
 }

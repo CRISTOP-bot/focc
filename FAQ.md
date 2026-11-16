@@ -1,65 +1,65 @@
 # Preguntas frecuentes (FAQ)
 
-## ¿Qué es FOCC?
+## ?Que es FOCC?
 
 FOCC (abreviado FOC) es un compilador de C propio, escrito en C11
-portátil. El frontend, el análisis semántico, la IR, el optimizador y el
+portatil. El frontend, el analisis semantico, la IR, el optimizador y el
 backend son implementaciones originales. **No** usa GCC, Clang ni LLVM
-como frontend ni como backend del código que compila.
+como frontend ni como backend del codigo que compila.
 
-## ¿Puedo usarlo en producción?
+## ?Puedo usarlo en produccion?
 
-No. FOCC está en pre-alpha: no hay conformidad con un estándar, no hay
+No. FOCC esta en pre-alpha: no hay conformidad con un estandar, no hay
 suite de conformidad completa y el comportamiento puede cambiar entre
-versiones. Úsalo solo para experimentar.
+versiones. Usalo solo para experimentar.
 
-## ¿Qué C soporta?
+## ?Que C soporta?
 
-Un subconjunto de C11. A día de hoy: aritmética, funciones, punteros,
+Un subconjunto de C11. A dia de hoy: aritmetica, funciones, punteros,
 arrays, structs/unions/enums, `char *`, `sizeof`, preprocesador completo
 (`#define`, `#include`, condicionales, `#pragma once`, `defined`,
-`__LINE__`, `__FILE__`, `#` y `##`), `for` con declaración en el
+`__LINE__`, `__FILE__`, `#` y `##`), `for` con declaracion en el
 inicializador y declaraciones con varios declaradores.
 
-No está soportado: `goto` (E0419), `switch` completo con
+No esta soportado: `goto` (E0419), `switch` completo con
 fall-through, `_Atomic`, `_Generic`, `typeof`, bitfields, `va_arg` y
 punto flotante (float/double) en el backend.
 
-## ¿Compila su propio código (self-host)?
+## ?Compila su propio codigo (self-host)?
 
-Todavía no. FOCC compila `libcc1/src/passes.c` a un objeto x86-64
+Todavia no. FOCC compila `libcc1/src/passes.c` a un objeto x86-64
 correcto (contiene `FOC_opt_constant_fold`, `FOC_opt_dead_code`,
-`FOC_opt_copy_propagation` con símbolos). El autoensamblado completo
-(`bin/foc.exe` compilado por `bin/foc.exe`) todavía no funciona: el
-backend genera instrucciones `mov` inválidas para llamadas variádicas
-como `fprintf`. Está documentado en
+`FOC_opt_copy_propagation` con simbolos). El autoensamblado completo
+(`bin/foc.exe` compilado por `bin/foc.exe`) todavia no funciona: el
+backend genera instrucciones `mov` invalidas para llamadas variadicas
+como `fprintf`. Esta documentado en
 [`docs/milestones.md`](docs/milestones.md).
 
-## ¿Por qué existe si ya están GCC y Clang?
+## ?Por que existe si ya estan GCC y Clang?
 
 Objetivos del proyecto:
 
-- Un compilador que se entienda pieza a pieza, útil para aprender cómo
+- Un compilador que se entienda pieza a pieza, util para aprender como
   funcionan los compiladores por dentro.
-- Control total sobre diagnósticos, IR y backend, sin depender de las
+- Control total sobre diagnosticos, IR y backend, sin depender de las
   decisiones de un backend externo.
-- Un backend mínimo y auditable (x86-64 Windows x64 ABI Microsoft).
+- Un backend minimo y auditable (x86-64 Windows x64 ABI Microsoft).
 
-## ¿Dónde está la documentación?
+## ?Donde esta la documentacion?
 
-- [`README.md`](README.md) — panorama y construcción.
-- [`docs/architecture.md`](docs/architecture.md) — diseño y decisiones.
-- [`docs/milestones.md`](docs/milestones.md) — estado real y verificado.
-- [`docs/decisions/`](docs/decisions) — registros de decisiones (ADR).
-- [`CHANGELOG.md`](CHANGELOG.md) — historial de cambios.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — cómo contribuir.
+- [`README.md`](README.md) - panorama y construccion.
+- [`docs/architecture.md`](docs/architecture.md) - diseno y decisiones.
+- [`docs/milestones.md`](docs/milestones.md) - estado real y verificado.
+- [`docs/decisions/`](docs/decisions) - registros de decisiones (ADR).
+- [`CHANGELOG.md`](CHANGELOG.md) - historial de cambios.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) - como contribuir.
 
-## ¿Cómo se publica una versión?
+## ?Como se publica una version?
 
 Ver [`RELEASING.md`](RELEASING.md).
 
-## ¿Cómo reporto un bug?
+## ?Como reporto un bug?
 
-Con una prueba de regresión si es posible (ver `CONTRIBUTING.md`) o, si
+Con una prueba de regresion si es posible (ver `CONTRIBUTING.md`) o, si
 crees que es una vulnerabilidad, con el canal descrito en
 [`SECURITY.md`](SECURITY.md).

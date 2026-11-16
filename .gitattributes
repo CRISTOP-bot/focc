@@ -1,4 +1,4 @@
-# FOCC — atributos de Git.
+# FOCC - atributos de Git.
 # Normaliza los ficheros de texto y marca los binarios explicitamente.
 
 * text=auto

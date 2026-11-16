@@ -48,7 +48,7 @@ typedef struct {
 
 struct FOCType {
     FOCTypeKind kind;
-    int id; /* identidad única para struct/union/enum */
+    int id; /* identidad unica para struct/union/enum */
     bool is_const;
     bool is_volatile;
     bool is_restrict;
@@ -57,7 +57,7 @@ struct FOCType {
     const char *name; /* nombre de la etiqueta */
     FOCType *elem;   /* puntero y array */
     int array_len;   /* -1 si es longitud desconocida */
-    FOCType *ret;    /* retorno de función */
+    FOCType *ret;    /* retorno de funcion */
     FOCType **params;
     size_t param_count;
     bool variadic;
@@ -89,10 +89,10 @@ bool FOC_type_is_unsigned(const FOCType *type);
 bool FOC_type_is_char(const FOCType *type);
 bool FOC_type_is_bool(const FOCType *type);
 
-/* Comparación estructural con detección de ciclos. */
+/* Comparacion estructural con deteccion de ciclos. */
 bool FOC_type_equal(const FOCType *a, const FOCType *b);
 
-/* Tamaño y alineación por defecto según el tipo y el tamaño de puntero. */
+/* Tamano y alineacion por defecto segun el tipo y el tamano de puntero. */
 int FOC_type_default_size(FOCTypeKind kind, int pointer_size);
 int FOC_type_default_align(FOCTypeKind kind, int pointer_size);
 
